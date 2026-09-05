@@ -1,0 +1,39 @@
+{
+  "date": "2026-09-05",
+  "measured": true,
+  "machine": "see 2026-09-05-machine.json",
+  "command": "node bench-gpu.mjs <teleprint.txt> --iters 5",
+  "adapterThatAnswered": { "vendor": "nvidia", "architecture": "blackwell", "device": "0x2d58" },
+  "adapterNote": "RTX 5070 Laptop GPU, driver 592.02, compute capability 12.0. Printed and checked, never assumed: Chrome ignores powerPreference on Windows (crbug.com/369219127) and this laptop also has an Intel iGPU.",
+  "artefactBytes": 27568130,
+  "artefactMB": 26.29,
+  "work": "count bytes equal to '=' (0x3D) -- the first pass of a real section parse, expressed as the embarrassingly-parallel reduction a GPU exists for",
+  "groundTruthCount": 43820,
+  "allVariantsAgreedWithCpu": true,
+  "cpu": {
+    "scalarByteLoop": { "ms": 15.3, "MBps": 1719 },
+    "bufferIndexOf":  { "ms": 3.6,  "MBps": 7227 }
+  },
+  "variants": [
+    { "id": "A", "name": "baseline   writeBuffer + u32/thread",        "nvidiaRule": "none beyond one batched transfer",                              "uploadMs": 7.18,  "uploadMBps": 3664, "computeMs": 2.350, "computeMBps": 11188, "correct": true },
+    { "id": "B", "name": "mapped     mappedAtCreation + u32/thread",   "nvidiaRule": "page-locked/pinned memory attains the highest bandwidth",       "uploadMs": 9.93,  "uploadMBps": 2649, "computeMs": 3.175, "computeMBps": 8281,  "correct": true },
+    { "id": "C", "name": "vec4       mappedAtCreation + vec4/thread",  "nvidiaRule": "128-bit coalesced loads maximise global memory throughput",     "uploadMs": 11.03, "uploadMBps": 2385, "computeMs": 3.050, "computeMBps": 8620,  "correct": true },
+    { "id": "D", "name": "gridstride vec4 + grid-stride loop",         "nvidiaRule": "occupancy and ILP hide memory latency",                         "uploadMs": 11.93, "uploadMBps": 2205, "computeMs": 2.725, "computeMBps": 9648,  "correct": true },
+    { "id": "E", "name": "resident   upload once, N kernels",          "nvidiaRule": "HIGH PRIORITY: minimise host<->device data transfer",           "uploadMs": 0,     "uploadMBps": null, "computeMs": 3.025, "computeMBps": 8691,  "correct": true, "endToEndVsBaseline": 3.15 }
+  ],
+  "gpuVsCpu": {
+    "computeOnlyVsCpuScalar": 6.5,
+    "computeOnlyVsCpuIndexOf": 1.5,
+    "endToEndVsCpuIndexOf": 0.38
+  },
+  "reading": [
+    "For a SINGLE pass over ~26 MB the RTX 5070 loses: end-to-end x0.38 against Buffer.indexOf. PCIe upload (7-12 ms) costs more than the entire CPU parse (3.6 ms).",
+    "Only the High-Priority transfer rule paid: E kept the buffer resident and ran many kernels, giving x3.15 end-to-end over the baseline.",
+    "B, C and D did NOT beat the baseline. At 2.3-3.2 ms the kernel is at the submission-overhead floor and memory-bound, so those deltas are noise, not wins, and are reported as such.",
+    "All five variants agreed with the CPU ground truth of 43,820. A fast wrong answer was never accepted."
+  ],
+  "environmentGotchasMeasuredHere": [
+    "Headless Chromium returns NO WebGPU adapter on this machine: requestAdapter() -> null, 'No available adapters'. A headless run falsely reports 'no GPU' on a laptop with two. The bench therefore runs HEADED by default.",
+    "Chrome ignores powerPreference on Windows (crbug.com/369219127). The adapter that actually answered must be printed and checked; asking for 'high-performance' guarantees nothing."
+  ]
+}
