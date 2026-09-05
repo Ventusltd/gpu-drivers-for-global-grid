@@ -91,7 +91,7 @@ def main():
     owners = json.loads((HERE / 'codex/review-owners.json').read_text(encoding='utf8'))
     queue = [HERE.parent / name for name in owners if (HERE.parent / name / '.git').exists()]
     write_json(out / 'QUEUE.json', {'repositories': list(map(str, queue)), 'scope': 'Review committed local heads; remote survey runs separately in Actions.'})
-    active = None; log = None; batch = 0; last_hour = -1; hourly = []; evidence_bytes = 0; paused_hot = False; bench_pending = []; reviews = []
+    active = None; log = None; batch = 0; last_hour = -1; hourly = []; evidence_bytes = 0; paused_hot = False; bench_pending = []; reviews = []; corpus_pending = True; group = []
     ctypes.windll.kernel32.SetThreadExecutionState(0x80000001)
     try:
         while time.monotonic() < deadline and not (out / 'STOP').exists():
@@ -109,7 +109,7 @@ def main():
             if shutil.disk_usage(out).free < 5 * GIB: reason = 'Less than 5 GiB disk space'
             if active and (reason or time.monotonic() - task_started > 180):
                 stop_child(active); active.wait(timeout=10); log.close()
-                record['interruptedJobs'].append({'mode': mode, 'repository': owner.name if mode == 'review' else None, 'reason': reason or '180 second timeout', 'log': str(log_path)})
+                record['interruptedJobs'].append({'mode': mode, 'repositories': [p.name for p in group] if mode == 'review' else [], 'reason': reason or '180 second timeout', 'log': str(log_path)})
                 record['interrupted'] += 1; active = None
             if active and active.poll() is not None:
                 code = active.returncode; log.close()
@@ -117,17 +117,14 @@ def main():
                 text = log_path.read_text(encoding='utf8', errors='replace')
                 result = None
                 try:
+                    result = json.loads(next(line[5:] for line in reversed(text.splitlines()) if line.startswith('JSON ')))
                     if mode == 'review':
-                        report_path = review_out / 'cartridge.json'
-                        result = {'cartridge': str(report_path), 'bytes': report_path.stat().st_size}
-                        evidence_bytes += result['bytes']
-                        reviewed = json.loads(report_path.read_text(encoding='utf8'))
-                        reviews.append({'repository': reviewed['repository'], 'commit': reviewed['commit'], 'parseFailures': len(reviewed['parseFailures']), 'inspected': reviewed['inspected'], 'truncated': reviewed['truncated']})
+                        correct = {r['repository'] for r in result['reviews']} == {p.name for p in group}
+                        reviews.extend(result['reviews'])
                         write_json(out / 'REVIEW-INDEX.json', reviews)
                         (out / 'REVIEW-INDEX.md').write_text('# Overnight source review cards\n\n' + '\n'.join(f'- [{r["repository"]}](reviews/{r["repository"]}/REVIEW.md): {r["parseFailures"]} parse failures; {r["inspected"]} unique blobs checked; truncated={r["truncated"]}' for r in reviews) + '\n', encoding='utf8')
-                        correct = reviewed['repository'] == owner.name and bool(reviewed['commit']) and isinstance(reviewed['inspected'], int)
+                    elif mode == 'corpus': correct = result['gpuCorpusVerified'] is True
                     else:
-                        result = json.loads(next(line[5:] for line in reversed(text.splitlines()) if line.startswith('JSON ')))
                         correct = all(r['correct'] for r in result['rows']) if mode == 'gpu' else all(r['sectionsAgree'] and r['digestsAgree'] for r in result['ladder'])
                 except Exception: correct = False
                 success = code == 0 and correct
@@ -139,12 +136,16 @@ def main():
             evidence_bytes = sum(p.stat().st_size for p in out.rglob('*') if p.is_file())
             if evidence_bytes > 450_000_000:
                 record['stopReason'] = 'Evidence storage budget reached'; break
-            if not active and not reason and s['availableGiB'] >= 2.6 and (bench_pending or queue):
-                batch += 1; mode = bench_pending.pop(0) if bench_pending else 'review'
+            if not active and not reason and s['availableGiB'] >= 2.6 and (bench_pending or queue or corpus_pending):
+                batch += 1; mode = bench_pending.pop(0) if bench_pending else ('review' if queue else 'corpus')
                 workers = max(1, min(len(affinity), int((s['availableGiB'] - 2.3) / .2)))
                 if mode == 'review':
-                    owner = queue.pop(0); review_out = out / 'reviews' / owner.name
-                    command = [os.sys.executable, str(HERE / 'codex/review-repo.py'), '--root', str(owner), '--out', str(review_out), '--workers', str(workers)]
+                    group = [queue.pop(0) for _ in range(min(3, len(queue), workers))]
+                    command = [os.sys.executable, str(HERE / 'codex/review-group.py'), '--out', str(out / 'reviews'), '--workers', str(workers)]
+                    for owner in group: command += ['--root', str(owner)]
+                elif mode == 'corpus':
+                    corpus_pending = False
+                    command = [os.sys.executable, str(HERE / 'codex/corpus-review.py'), '--reviews', str(out / 'reviews'), '--out', str(out / 'gpu-corpus')]
                 else:
                     command = ['node', str(HERE / 'claude' / ('bench-gpu.mjs' if mode == 'gpu' else 'bench-cpu-ram.mjs')), str(args.artifact)]
                     command += ['--iters', '100', '--headed=0'] if mode == 'gpu' else ['--threads', ','.join(map(str, sorted({1, max(1, workers // 2), workers})))]
@@ -161,17 +162,18 @@ def main():
             # Check output growth during the task, not only after it exits.
             if active and log_path.stat().st_size > 8_000_000:
                 record['stopReason'] = 'Task log budget reached'; break
-            time.sleep(5)
+            time.sleep(1 if active or queue or bench_pending or corpus_pending else 5)
     finally:
         ctypes.windll.kernel32.SetThreadExecutionState(0x80000000)
         if active:
             stop_child(active)
-            record['interruptedJobs'].append({'mode': mode, 'repository': owner.name if mode == 'review' else None, 'reason': 'Controller stopped', 'log': str(log_path)})
+            record['interruptedJobs'].append({'mode': mode, 'repositories': [p.name for p in group] if mode == 'review' else [], 'reason': 'Controller stopped', 'log': str(log_path)})
         if log and not log.closed: log.close()
         if hourly: write_json(out / f'hour-{last_hour:02d}.json', {'samples': hourly, 'completed': record['completed'], 'failed': record['failed']})
         record['finishedAt'] = now(); record.setdefault('stopReason', 'STOP requested' if (out / 'STOP').exists() else 'Duration complete')
         record['remainingReviews'] = list(map(str, queue))
         record['reviewCoverageComplete'] = not queue and not any(j['mode'] == 'review' for j in record['interruptedJobs']) and record['failed'] == 0
+        record['gpuCorpusPending'] = corpus_pending
         write_json(out / 'RUN.json', record)
 
 

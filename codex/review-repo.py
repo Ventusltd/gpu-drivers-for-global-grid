@@ -60,6 +60,16 @@ def main():
     with concurrent.futures.ThreadPoolExecutor(max_workers=max(1, min(12, args.workers))) as pool:
         results = list(pool.map(lambda e: inspect(args.root, e), selected))
     failures = [r for r in results if r['parse'] == 'failed']
+    history = git(args.root, 'log', head, '--since=153 days ago', '-500', '--format=COMMIT:%H', '--numstat').decode('utf8', errors='replace')
+    churn = {}; history_commits = []
+    for line in history.splitlines():
+        if line.startswith('COMMIT:'): history_commits.append(line[7:])
+        else:
+            parts = line.split('\t', 2)
+            if len(parts) == 3 and parts[0].isdigit() and parts[1].isdigit():
+                item = churn.setdefault(parts[2], {'path': parts[2], 'touches': 0, 'added': 0, 'deleted': 0})
+                item['touches'] += 1; item['added'] += int(parts[0]); item['deleted'] += int(parts[1])
+    hotspots = sorted(churn.values(), key=lambda x: (-x['touches'], -x['added'] - x['deleted']))[:20]
     candidates = [dict(path=r['path'], bytes=r['bytes'], lines=r['lines'], symbols=r['symbols'], imports=r['imports'],
                        decision='Review extraction boundaries; size alone does not prove separability') for r in results if r['lines'] > 800][:12]
     report = {'schema': 'ventus.source-review-cartridge.v1', 'repository': args.root.name, 'commit': head,
@@ -67,6 +77,7 @@ def main():
               'trackedFiles': len(entries), 'eligibleFiles': len(eligible), 'uniqueEligibleBlobs': len(unique), 'inspected': len(results),
               'truncated': len(selected) < len(unique), 'seconds': round(time.monotonic() - started, 2),
               'parseFailures': failures, 'extractionCandidates': candidates,
+              'changeHotspots': hotspots, 'history': {'windowDays': 153, 'commitsObserved': len(history_commits), 'capMayTruncate': len(history_commits) == 500, 'head': head, 'oldestObservedCommit': history_commits[-1] if history_commits else None},
               'exactBlobDuplicates': [dict(blob=k, paths=v[:30], copies=len(v)) for k, v in duplicate.items() if len(v) > 1][:100],
               'files': results}
     raw = (json.dumps(report, indent=2) + '\n').encode()
@@ -75,6 +86,7 @@ def main():
     brief = f'# {args.root.name}: review cartridge\n\nCommit `{head}`. Inspected {len(results)}/{len(unique)} eligible unique blobs; {len(failures)} parse failures.\n\n'
     brief += '## Inspect first\n\n' + '\n'.join('- `' + r['path'] + '`: ' + r.get('error', '')[:180].replace('\n', ' ') for r in failures[:8])
     brief += '\n\n## Candidate extraction boundaries\n\n' + '\n'.join(f'- `{r["path"]}`: {r["lines"]} lines; symbols: ' + ', '.join(r['symbols'][:8]) for r in candidates[:6])
+    brief += '\n\n## Recent change hotspots\n\n' + '\n'.join(f'- `{r["path"]}`: {r["touches"]} touched commits in bounded five-month history.' for r in hotspots[:5])
     brief += '\n\nThese are review proposals, not generated or accepted application cartridges. Read cartridge.json for hashes, exclusions and coverage.\n'
     (args.out / 'REVIEW.md').write_text(brief, encoding='utf8')
     print(json.dumps({'repository': args.root.name, 'inspected': len(results), 'parseFailures': len(failures)}))
