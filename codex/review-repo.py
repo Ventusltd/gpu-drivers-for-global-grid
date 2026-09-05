@@ -21,7 +21,10 @@ def inspect(root, entry):
     result = {'path': name, 'blob': sha, 'bytes': len(raw), 'lines': len(text.splitlines()), 'sha256': hashlib.sha256(raw).hexdigest()}
     suffix = Path(name).suffix.lower()
     try:
-        if suffix == '.py': ast.parse(text, filename=name); result['parse'] = 'pass'
+        if '.excerpt.' in name:
+            result['parse'] = 'not-standalone-excerpt'
+            result['reviewRequired'] = 'Resolve provenance to the complete enclosing source before syntax or behavioral conclusions'
+        elif suffix == '.py': ast.parse(raw, filename=name); result['parse'] = 'pass'
         elif suffix == '.json': json.loads(text); result['parse'] = 'pass'
         elif suffix in ('.js', '.mjs', '.cjs'):
             # Parse stdin only; never import/run target-owned code.
