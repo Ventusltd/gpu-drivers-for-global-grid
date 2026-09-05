@@ -147,7 +147,7 @@ const gpu = await page.evaluate(async ({ offsets, sizes, n }) => {
   const padded = new Uint8Array(words * 4);
   padded.set(raw);
 
-  /* NVIDIA, High Priority: the corpus crosses PCIe once and stays resident for
+  /* CUDA Best Practices Guide, High Priority: the corpus crosses PCIe once and stays resident for
      both passes. */
   const tUp = performance.now();
   const srcBuf = device.createBuffer({ size: padded.byteLength, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST });

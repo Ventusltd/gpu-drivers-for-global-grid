@@ -2,7 +2,7 @@
 
 A working benchmark harness that answers one question with timings rather than
 belief: **for the work Global Grid actually does to a large text artefact, is
-the discrete NVIDIA GPU worth using?**
+the discrete GPU worth using?**
 
 Measured on one named machine on 2026-09-05. Every figure below is a timing this
 harness took; nothing here is a vendor claim or an extrapolation.
@@ -18,7 +18,7 @@ in this repository.
 | --- | --- |
 | CPU | Intel Core Ultra 7 255HX — 20 cores / 20 logical |
 | RAM | 15.46 GB DDR5-6400 (2 x 8 GB) |
-| GPU (discrete) | NVIDIA GeForce RTX 5070 Laptop GPU — 8151 MiB, driver 592.02, compute capability 12.0 |
+| GPU (discrete) | GeForce RTX 5070 Laptop GPU — 8151 MiB, driver 592.02, compute capability 12.0 |
 | GPU (integrated) | Intel iGPU — present, which is exactly why the answering adapter is printed |
 | OS / runtime | Windows 11, Node v24.19.0 |
 | Artefact | GridAtlas teleprint source-code dump — 27,568,130 bytes (26.29 MB), 112 BEGIN/END markers, 43,820 `=` bytes |
@@ -43,7 +43,7 @@ its own copy**. That is the honest model of N readers opening the artefact on a
 DC machine — not one shared buffer sliced N ways, which would measure something
 else entirely.
 
-### 2. `bench-gpu.mjs` — five NVIDIA rules, one at a time
+### 2. `bench-gpu.mjs` — five CUDA best-practice rules, one at a time
 
 The same artefact uploaded to the discrete GPU and reduced by a WebGPU compute
 shader, driven through Playwright Chromium. The work is counting bytes equal to
@@ -51,10 +51,10 @@ shader, driven through Playwright Chromium. The work is counting bytes equal to
 so this is the first pass of a real parse, expressed as the embarrassingly
 parallel reduction a GPU exists for.
 
-Five variants, each turning on **one** rule from NVIDIA's CUDA C++ Best
-Practices Guide, so the cost of each is a measured delta rather than a belief:
+Five variants, each turning on **one** rule from the CUDA C++ Best Practices
+Guide, so the cost of each is a measured delta rather than a belief:
 
-| | Variant | NVIDIA rule under test |
+| | Variant | Rule under test |
 | --- | --- | --- |
 | A | `writeBuffer` upload, one u32 per thread, workgroup 256 | baseline — nothing beyond one batched transfer |
 | B | upload via `mappedAtCreation` | page-locked/pinned memory attains the highest transfer bandwidth |
@@ -146,8 +146,8 @@ GPU against CPU:
 
 A different input from the teleprint: the GridAtlas served tree `atlas/` —
 **223 files, 40,161,723 bytes (38.30 MB)**, `.js`/`.mjs`/`.html`/`.css` only.
-Adapter that answered: `vendor=nvidia architecture=blackwell`, NVIDIA GeForce
-RTX 5070 Laptop GPU.
+Adapter that answered: `vendor=nvidia architecture=blackwell`, GeForce RTX 5070
+Laptop GPU.
 
 | Stage | Time | Throughput |
 | --- | ---: | ---: |
@@ -216,7 +216,7 @@ The PCIe upload costs 7–12 ms; the entire CPU parse costs 3.6 ms. End-to-end
 the GPU comes in at **x0.38** — it loses, and it loses to one line of
 `Buffer.indexOf`.
 
-Of the five NVIDIA rules, **only the High-Priority one paid**: minimise
+Of the five rules, **only the High-Priority one paid**: minimise
 host↔device transfer. Keeping the buffer resident and running many kernels over
 it (variant E) was x3.15 end-to-end against the baseline.
 
@@ -287,7 +287,7 @@ for `bench-gpu.mjs`.
 `.github/workflows/claude-bench.yml` runs the CPU/RAM ladder on a
 GitHub-hosted runner against a generated stand-in artefact, on push to this
 lane and on `workflow_dispatch`. It **skips the GPU bench with an explicit
-message**: GitHub-hosted runners have no NVIDIA GPU, and a green tick on a
+message**: GitHub-hosted runners have no discrete GPU, and a green tick on a
 benchmark that never ran would be worse than no tick at all. The GPU numbers in
 `results/` can only come from a machine with the card.
 

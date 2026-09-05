@@ -1,25 +1,25 @@
 /**
- * THE TELEPRINT ON THE RTX 5070, WITH NVIDIA'S OWN RULES APPLIED.
+ * THE TELEPRINT ON THE RTX 5070, WITH THE CUDA BEST-PRACTICE RULES APPLIED.
  * ---------------------------------------------------------------------------
  * The same ~27.5 MB artefact the CPU bench ate, uploaded to the discrete GPU and
  * reduced by a compute shader. Offline: a Chromium already installed for
  * Playwright, WebGPU on, and NOTHING fetched from the network -- the bytes are
  * served to the page from disk through a route interceptor.
  *
- * WHY FIVE VARIANTS AND NOT ONE. NVIDIA's CUDA C++ Best Practices Guide gives
+ * WHY FIVE VARIANTS AND NOT ONE. the CUDA C++ Best Practices Guide gives
  * specific, testable rules. Each variant below turns ONE of them on, so the
  * cost of each is a measured delta rather than a belief:
  *
  *   A baseline      writeBuffer upload, one u32 (4 bytes) per thread, wg 256
  *   B mapped        upload via mappedAtCreation -- the WebGPU analogue of
- *                   NVIDIA's "page-locked/pinned memory transfers attain the
+ *                   the guide's "page-locked/pinned memory transfers attain the
  *                   highest bandwidth", because it writes into driver-owned
  *                   memory once instead of staging a pageable copy
- *   C vectorized    one vec4<u32> (16 bytes) per thread. NVIDIA: coalesced,
+ *   C vectorized    one vec4<u32> (16 bytes) per thread. Guide: coalesced,
  *                   128-bit loads maximise global memory throughput
- *   D gridstride    fewer workgroups, each thread looping. NVIDIA: occupancy
+ *   D gridstride    fewer workgroups, each thread looping. Guide: occupancy
  *                   and instruction-level parallelism hide memory latency
- *   E resident      upload ONCE, run the kernel N times. NVIDIA, High Priority:
+ *   E resident      upload ONCE, run the kernel N times. Guide, High Priority:
  *                   "Minimize data transfer between the host and the device"
  *
  * WHICH GPU ANSWERED is printed, never assumed: this laptop has an Intel iGPU
@@ -122,7 +122,7 @@ const result = await page.evaluate(async (iters) => {
   device.addEventListener?.('uncapturederror', e => console.log('uncaptured: ' + e.error.message));
 
   const raw = new Uint8Array(await (await fetch('/payload.bin')).arrayBuffer());
-  /* NVIDIA: batch many small transfers into ONE larger transfer. The whole
+  /* Guide: batch many small transfers into ONE larger transfer. The whole
      artefact goes across in a single copy, padded to a 16-byte boundary so the
      vec4 variant's loads stay aligned. Padding is zero, which is not '='. */
   const quads = Math.ceil(raw.length / 16);
@@ -130,7 +130,7 @@ const result = await page.evaluate(async (iters) => {
   padded.set(raw);
   const words = padded.byteLength / 4;
 
-  const WG = 256; // multiple of 32: NVIDIA, block sizes should be warp multiples
+  const WG = 256; // multiple of 32: guide, block sizes should be warp multiples
 
   const src = `
 @group(0) @binding(0) var<storage, read> src : array<u32>;
@@ -167,7 +167,7 @@ fn hits(w : u32) -> u32 {
   if (((w >> 24u) & 0xffu) == 0x3du) { c = c + 1u; }
   return c;
 }
-/* NVIDIA: 128-bit (vec4) loads maximise global memory throughput, and
+/* Guide: 128-bit (vec4) loads maximise global memory throughput, and
    consecutive threads touch consecutive 16-byte lanes, so the warp coalesces. */
 @compute @workgroup_size(${WG})
 fn vectorized(@builtin(global_invocation_id) g : vec3<u32>, @builtin(local_invocation_id) l : vec3<u32>) {
@@ -182,7 +182,7 @@ fn vectorized(@builtin(global_invocation_id) g : vec3<u32>, @builtin(local_invoc
   workgroupBarrier();
   if (l.x == 0u) { atomicAdd(&total, atomicLoad(&partial)); }
 }
-/* NVIDIA: fewer, fatter blocks with a grid-stride loop keep the SMs occupied
+/* Guide: fewer, fatter blocks with a grid-stride loop keep the SMs occupied
    and expose instruction-level parallelism to hide memory latency. */
 @compute @workgroup_size(${WG})
 fn gridstride(@builtin(global_invocation_id) g : vec3<u32>, @builtin(local_invocation_id) l : vec3<u32>,
@@ -268,7 +268,7 @@ fn gridstride(@builtin(global_invocation_id) g : vec3<u32>, @builtin(local_invoc
     variants.push({ name, note, groups, threads: groups * WG, runs });
   }
 
-  await measure('A baseline  writeBuffer + u32/thread', 'NVIDIA rule: none applied beyond one batched transfer',
+  await measure('A baseline  writeBuffer + u32/thread', 'guide rule: none applied beyond one batched transfer',
     newSrcWriteBuffer, pScalar, Math.ceil(words / WG));
   await measure('B mapped    mappedAtCreation + u32/thread', 'pinned-memory analogue: one write into driver memory',
     newSrcMapped, pScalar, Math.ceil(words / WG));
@@ -277,7 +277,7 @@ fn gridstride(@builtin(global_invocation_id) g : vec3<u32>, @builtin(local_invoc
   await measure('D gridstride mappedAtCreation + vec4 + loop', 'occupancy/ILP: 1024 fat workgroups',
     newSrcMapped, pGrid, 1024);
 
-  /* E: NVIDIA High Priority -- minimise host<->device transfer. Upload ONCE,
+  /* E: Guide High Priority -- minimise host<->device transfer. Upload ONCE,
      then run the kernel `iters` times on the resident buffer. */
   const resident = newSrcMapped();
   await device.queue.onSubmittedWorkDone();
@@ -286,7 +286,7 @@ fn gridstride(@builtin(global_invocation_id) g : vec3<u32>, @builtin(local_invoc
     const d = await dispatch(pVec, resident, Math.ceil(quads / WG));
     residentRuns.push({ uploadMs: 0, computeMs: d.ms, count: d.count });
   }
-  variants.push({ name: 'E resident  upload once, N kernels', note: 'NVIDIA High Priority: minimise host<->device transfer',
+  variants.push({ name: 'E resident  upload once, N kernels', note: 'Guide High Priority: minimise host<->device transfer',
     groups: Math.ceil(quads / WG), threads: Math.ceil(quads / WG) * WG, runs: residentRuns });
 
   return {
@@ -323,7 +323,7 @@ for (const v of result.variants) {
     + `  ${ok ? 'count MATCHES CPU' : 'COUNT WRONG (' + v.runs[0].count + ' vs ' + cpuCount + ')'}`);
 }
 
-console.log('\n=== WHAT EACH NVIDIA RULE BOUGHT (MEASURED DELTA) ===');
+console.log('\n=== WHAT EACH RULE BOUGHT (MEASURED DELTA) ===');
 const base = rows[0];
 for (const r of rows.slice(1)) {
   console.log(`${r.name.padEnd(38)} compute x${(base.computeMs / r.computeMs).toFixed(2)} vs baseline`
