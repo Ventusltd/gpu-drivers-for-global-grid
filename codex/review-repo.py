@@ -45,7 +45,10 @@ def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument('--root', type=Path, required=True); p.add_argument('--out', type=Path, required=True)
     p.add_argument('--workers', type=int, default=2)
+    p.add_argument('--offset', type=int, default=0)
+    p.add_argument('--limit', type=int, default=240)
     args = p.parse_args(); args.root = args.root.resolve(); args.out.mkdir(parents=True, exist_ok=True)
+    if args.offset < 0 or not 1 <= args.limit <= 2000: p.error('offset must be nonnegative and limit must be 1..2000')
     started = time.monotonic(); head = git(args.root, 'rev-parse', 'HEAD').decode().strip()
     entries = []
     for row in git(args.root, 'ls-tree', '-rlz', head).split(b'\0'):
@@ -59,7 +62,7 @@ def main():
     eligible.sort(key=lambda e: (-int(e[3]), e[4])); unique = {}; duplicate = {}
     for e in eligible:
         unique.setdefault(e[2], e); duplicate.setdefault(e[2], []).append(e[4])
-    selected = list(unique.values())[:240]
+    selected = list(unique.values())[args.offset:args.offset+args.limit]
     with concurrent.futures.ThreadPoolExecutor(max_workers=max(1, min(12, args.workers))) as pool:
         results = list(pool.map(lambda e: inspect(args.root, e), selected))
     failures = [r for r in results if r['parse'] == 'failed']
@@ -78,7 +81,7 @@ def main():
     report = {'schema': 'ventus.source-review-cartridge.v1', 'repository': args.root.name, 'commit': head,
               'scope': 'Committed HEAD only, not dirty work. Bounded source parse and lexical references; no runtime or application correctness claim.',
               'trackedFiles': len(entries), 'eligibleFiles': len(eligible), 'uniqueEligibleBlobs': len(unique), 'inspected': len(results),
-              'truncated': len(selected) < len(unique), 'seconds': round(time.monotonic() - started, 2),
+              'truncated': len(selected) < len(unique), 'selection': {'offset': args.offset, 'limit': args.limit, 'remainingAfter': max(0,len(unique)-args.offset-len(selected))}, 'seconds': round(time.monotonic() - started, 2),
               'parseFailures': failures, 'extractionCandidates': candidates,
               'changeHotspots': hotspots, 'history': {'windowDays': 153, 'commitsObserved': len(history_commits), 'capMayTruncate': len(history_commits) == 500, 'head': head, 'oldestObservedCommit': history_commits[-1] if history_commits else None},
               'exactBlobDuplicates': [dict(blob=k, paths=v[:30], copies=len(v)) for k, v in duplicate.items() if len(v) > 1][:100],
