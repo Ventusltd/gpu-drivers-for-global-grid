@@ -1,0 +1,31 @@
+{
+  "date": "2026-09-05",
+  "measured": true,
+  "machine": "see 2026-09-05-machine.json (Intel Core Ultra 7 255HX, 20c/20t, 15.46 GB DDR5-6400, Node v24.19.0, Windows 11)",
+  "command": "node bench-cpu-ram.mjs <teleprint.txt> --threads 1,2,4,8,12",
+  "artefactBytes": 27568130,
+  "artefactMB": 26.29,
+  "singleThread": {
+    "readMs": 8.2,
+    "readMBps": 3200,
+    "memcpyMs": 7.6,
+    "memcpyMBps": 3400,
+    "sha256Ms": 6.4,
+    "sha256MBps": 4100,
+    "utf8DecodeMs": 14.7,
+    "regexParseMs": 7.5
+  },
+  "ladder": [
+    { "threads": 1,  "wallMs": 73,  "aggregateMBps": 360,  "peakWorkerRssMB": 246,  "speedup": 1.00, "efficiencyPct": 100 },
+    { "threads": 2,  "wallMs": 77,  "aggregateMBps": 685,  "peakWorkerRssMB": 367,  "speedup": 1.90, "efficiencyPct": 95 },
+    { "threads": 4,  "wallMs": 89,  "aggregateMBps": 1185, "peakWorkerRssMB": 607,  "speedup": 3.29, "efficiencyPct": 82 },
+    { "threads": 8,  "wallMs": 120, "aggregateMBps": 1750, "peakWorkerRssMB": 1080, "speedup": 4.86, "efficiencyPct": 61 },
+    { "threads": 12, "wallMs": 168, "aggregateMBps": 1874, "peakWorkerRssMB": 1516, "speedup": 5.21, "efficiencyPct": 43 }
+  ],
+  "reading": [
+    "Each worker reads and holds its OWN copy of the artefact: N independent readers, not one buffer sliced N ways.",
+    "Scaling rolls off hard after 8 threads.",
+    "Free RAM at the start of the ladder was 4.42 GB; 12 workers held 1.5 GB resident.",
+    "The ceiling is memory and memory bandwidth, not core count: 20 logical cores were available and unused capacity remained."
+  ]
+}

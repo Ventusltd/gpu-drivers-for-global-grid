@@ -1,0 +1,843 @@
+{
+  "measuredAt": "2026-09-05T16:23:38.445Z",
+  "machine": {
+    "cpu": "Intel(R) Core(TM) Ultra 7 255HX",
+    "logicalCores": 20,
+    "ramGB": 15.46,
+    "gpu": {
+      "vendor": "nvidia",
+      "architecture": "blackwell",
+      "description": "NVIDIA GeForce RTX 5070 Laptop GPU"
+    }
+  },
+  "corpus": {
+    "root": "C:/Users/vikra/OneDrive/Documents/GitHub/gridatlas-main-202609050200/atlas",
+    "files": 223,
+    "bytes": 40161723
+  },
+  "gpuTiming": {
+    "uploadMs": 37.6000000089407,
+    "histMs": 4.100000008940697,
+    "simMs": 40,
+    "pairs": 24753
+  },
+  "verification": {
+    "histogramMatchesCpu": true
+  },
+  "exactDuplicates": {
+    "groups": 12,
+    "redundantBytes": 487454,
+    "pctOfCorpus": 1.21,
+    "examples": [
+      {
+        "bytes": 91167,
+        "files": [
+          "releases/202608292311-atlas-v9/ventus-corev8engine.js",
+          "releases/202608300453-atlas-v9/ventus-corev8engine.js"
+        ]
+      },
+      {
+        "bytes": 90642,
+        "files": [
+          "releases/202608291758-atlas-v9/ventus-corev8engine.js",
+          "releases/202608291818-atlas-v9/ventus-corev8engine.js",
+          "releases/202608292126-atlas-v9/ventus-corev8engine.js"
+        ]
+      },
+      {
+        "bytes": 21238,
+        "files": [
+          "releases/202608292311-atlas-v9/index.html",
+          "releases/202608300453-atlas-v9/index.html"
+        ]
+      },
+      {
+        "bytes": 14893,
+        "files": [
+          "releases/202608291758-atlas-v9/ventusv8.css",
+          "releases/202608291818-atlas-v9/ventusv8.css",
+          "releases/202608292126-atlas-v9/ventusv8.css",
+          "releases/202608292311-atlas-v9/ventusv8.css",
+          "releases/202608300453-atlas-v9/ventusv8.css"
+        ]
+      },
+      {
+        "bytes": 13868,
+        "files": [
+          "releases/202608291818-atlas-v9/202608291818-place-postcode-search.js",
+          "releases/202608292126-atlas-v9/202608291818-place-postcode-search.js",
+          "releases/202608292311-atlas-v9/202608291818-place-postcode-search.js"
+        ]
+      },
+      {
+        "bytes": 9299,
+        "files": [
+          "releases/202608292126-atlas-v9/202608292126-map-ready-fetch-bridge.js",
+          "releases/202608292311-atlas-v9/202608292126-map-ready-fetch-bridge.js",
+          "releases/202608300453-atlas-v9/202608292126-map-ready-fetch-bridge.js"
+        ]
+      },
+      {
+        "bytes": 8479,
+        "files": [
+          "releases/202608292311-atlas-v9/202608292311-maplibre-worker-bridge.js",
+          "releases/202608300453-atlas-v9/202608292311-maplibre-worker-bridge.js"
+        ]
+      },
+      {
+        "bytes": 6672,
+        "files": [
+          "releases/202608291237-atlas-v9/cartridges/202608290716-repd-address-flyto.mjs",
+          "releases/202608291239-atlas-v9/cartridges/202608290716-repd-address-flyto.mjs",
+          "releases/202608291430-atlas-v9/cartridges/202608290716-repd-address-flyto.mjs"
+        ]
+      },
+      {
+        "bytes": 6353,
+        "files": [
+          "releases/202608291758-atlas-v9/v9-parquet-fetch-bridge.js",
+          "releases/202608291818-atlas-v9/v9-parquet-fetch-bridge.js"
+        ]
+      },
+      {
+        "bytes": 5223,
+        "files": [
+          "index.html",
+          "v/202609012141/index.html",
+          "v/202609012317/index.html",
+          "v/202609012345/index.html",
+          "v/202609020018/index.html",
+          "v/202609040403/index.html",
+          "v/202609051211/index.html",
+          "v/202609051307/index.html",
+          "v/202609051309/index.html",
+          "v/202609051329/index.html"
+        ]
+      },
+      {
+        "bytes": 4750,
+        "files": [
+          "releases/202608291237-atlas-v9/assets/atlas-v9.css",
+          "releases/202608291239-atlas-v9/assets/atlas-v9.css",
+          "releases/202608291430-atlas-v9/assets/atlas-v9.css"
+        ]
+      },
+      {
+        "bytes": 1588,
+        "files": [
+          "releases/202608292126-atlas-v9/202608292126-pre-snapped-config-adapter.js",
+          "releases/202608292311-atlas-v9/202608292126-pre-snapped-config-adapter.js",
+          "releases/202608300453-atlas-v9/202608292126-pre-snapped-config-adapter.js"
+        ]
+      }
+    ]
+  },
+  "nearDuplicates": {
+    "threshold": 0.99,
+    "pairsAtThreshold": 11053,
+    "byteIdentical": 77,
+    "nearNotIdentical": 10976,
+    "top": [
+      {
+        "cosine": 1,
+        "a": "cartridges/202609032012-sld-sandbox-v9-8.js",
+        "b": "cartridges/202609032213-sld-sandbox-v9-8.js",
+        "bytesA": 371622,
+        "bytesB": 371816
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609032041-sld-sandbox-v9-8.js",
+        "b": "cartridges/202609032213-sld-sandbox-v9-8.js",
+        "bytesA": 371622,
+        "bytesB": 371816
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609032041-sld-sandbox-v9-8.js",
+        "b": "cartridges/202609032246-sld-sandbox-v9-8.js",
+        "bytesA": 371622,
+        "bytesB": 372078
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609040058-substation-intelligence-v9-63.js",
+        "b": "cartridges/202609040134-substation-intelligence-v9-63.js",
+        "bytesA": 292085,
+        "bytesB": 293168
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609041250-substation-intelligence-v9-63.js",
+        "b": "cartridges/202609041330-substation-intelligence-v9-63.js",
+        "bytesA": 330895,
+        "bytesB": 332084
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609031809-sld-sandbox-v9-8.js",
+        "b": "cartridges/202609032012-sld-sandbox-v9-8.js",
+        "bytesA": 371622,
+        "bytesB": 371622
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609031809-sld-sandbox-v9-8.js",
+        "b": "cartridges/202609032041-sld-sandbox-v9-8.js",
+        "bytesA": 371622,
+        "bytesB": 371622
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609031809-sld-sandbox-v9-8.js",
+        "b": "cartridges/202609032213-sld-sandbox-v9-8.js",
+        "bytesA": 371622,
+        "bytesB": 371816
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609031809-sld-sandbox-v9-8.js",
+        "b": "cartridges/202609032315-sld-sandbox-v9-8.js",
+        "bytesA": 371622,
+        "bytesB": 372078
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609032005-substation-intelligence-v9-63.js",
+        "b": "cartridges/202609032012-substation-intelligence-v9-63.js",
+        "bytesA": 251572,
+        "bytesB": 251688
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609032012-sld-sandbox-v9-8.js",
+        "b": "cartridges/202609032041-sld-sandbox-v9-8.js",
+        "bytesA": 371622,
+        "bytesB": 371622
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609032012-sld-sandbox-v9-8.js",
+        "b": "cartridges/202609032222-sld-sandbox-v9-8.js",
+        "bytesA": 371622,
+        "bytesB": 371816
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609032012-sld-sandbox-v9-8.js",
+        "b": "cartridges/202609032246-sld-sandbox-v9-8.js",
+        "bytesA": 371622,
+        "bytesB": 372078
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609032012-sld-sandbox-v9-8.js",
+        "b": "cartridges/202609032315-sld-sandbox-v9-8.js",
+        "bytesA": 371622,
+        "bytesB": 372078
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609032041-sld-sandbox-v9-8.js",
+        "b": "cartridges/202609032222-sld-sandbox-v9-8.js",
+        "bytesA": 371622,
+        "bytesB": 371816
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609032041-sld-sandbox-v9-8.js",
+        "b": "cartridges/202609032315-sld-sandbox-v9-8.js",
+        "bytesA": 371622,
+        "bytesB": 372078
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609032041-sld-sandbox-v9-8.js",
+        "b": "cartridges/202609040021-sld-sandbox-v9-8.js",
+        "bytesA": 371622,
+        "bytesB": 372078
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609032213-sld-sandbox-v9-8.js",
+        "b": "cartridges/202609032246-sld-sandbox-v9-8.js",
+        "bytesA": 371816,
+        "bytesB": 372078
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609032246-sld-sandbox-v9-8.js",
+        "b": "cartridges/202609032315-sld-sandbox-v9-8.js",
+        "bytesA": 372078,
+        "bytesB": 372078
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609032246-substation-intelligence-v9-63.js",
+        "b": "cartridges/202609032315-substation-intelligence-v9-63.js",
+        "bytesA": 258938,
+        "bytesB": 259054
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609032315-sld-sandbox-v9-8.js",
+        "b": "cartridges/202609040021-sld-sandbox-v9-8.js",
+        "bytesA": 372078,
+        "bytesB": 372078
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609041954-sld-sandbox-v9-8.js",
+        "b": "cartridges/202609041957-sld-sandbox-v9-8.js",
+        "bytesA": 362168,
+        "bytesB": 362168
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609050238-sld-sandbox-v9-8.js",
+        "b": "cartridges/202609050354-sld-sandbox-v9-8.js",
+        "bytesA": 363011,
+        "bytesB": 363011
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609050244-sld-sandbox-v9-8.js",
+        "b": "cartridges/202609050354-sld-sandbox-v9-8.js",
+        "bytesA": 363011,
+        "bytesB": 363011
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609050354-sld-sandbox-v9-8.js",
+        "b": "cartridges/202609051522-sld-sandbox-v9-8.js",
+        "bytesA": 363011,
+        "bytesB": 364209
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609051522-sld-sandbox-v9-8.js",
+        "b": "cartridges/202609051540-sld-sandbox-v9-8.js",
+        "bytesA": 364209,
+        "bytesB": 364209
+      },
+      {
+        "cosine": 1,
+        "a": "releases/202608292126-atlas-v9/index.html",
+        "b": "releases/202608292311-atlas-v9/index.html",
+        "bytesA": 21238,
+        "bytesB": 21238
+      },
+      {
+        "cosine": 1,
+        "a": "releases/202608292126-atlas-v9/index.html",
+        "b": "releases/202608300453-atlas-v9/index.html",
+        "bytesA": 21238,
+        "bytesB": 21238
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609030233-substation-intelligence-v9-63.js",
+        "b": "cartridges/202609030234-substation-intelligence-v9-63.js",
+        "bytesA": 238433,
+        "bytesB": 238649
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609031809-sld-sandbox-v9-8.js",
+        "b": "cartridges/202609032222-sld-sandbox-v9-8.js",
+        "bytesA": 371622,
+        "bytesB": 371816
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609031809-sld-sandbox-v9-8.js",
+        "b": "cartridges/202609032246-sld-sandbox-v9-8.js",
+        "bytesA": 371622,
+        "bytesB": 372078
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609032012-sld-sandbox-v9-8.js",
+        "b": "cartridges/202609040021-sld-sandbox-v9-8.js",
+        "bytesA": 371622,
+        "bytesB": 372078
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609032041-substation-intelligence-v9-63.js",
+        "b": "cartridges/202609032213-substation-intelligence-v9-63.js",
+        "bytesA": 254525,
+        "bytesB": 254629
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609032213-sld-sandbox-v9-8.js",
+        "b": "cartridges/202609032222-sld-sandbox-v9-8.js",
+        "bytesA": 371816,
+        "bytesB": 371816
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609032222-sld-sandbox-v9-8.js",
+        "b": "cartridges/202609032246-sld-sandbox-v9-8.js",
+        "bytesA": 371816,
+        "bytesB": 372078
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609032222-substation-intelligence-v9-63.js",
+        "b": "cartridges/202609032246-substation-intelligence-v9-63.js",
+        "bytesA": 258799,
+        "bytesB": 258938
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609032246-sld-sandbox-v9-8.js",
+        "b": "cartridges/202609040021-sld-sandbox-v9-8.js",
+        "bytesA": 372078,
+        "bytesB": 372078
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609040046-sld-sandbox-v9-8.js",
+        "b": "cartridges/202609040047-sld-sandbox-v9-8.js",
+        "bytesA": 358554,
+        "bytesB": 358594
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609040134-sld-sandbox-v9-8.js",
+        "b": "cartridges/202609040219-sld-sandbox-v9-8.js",
+        "bytesA": 362128,
+        "bytesB": 362128
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609041945-substation-intelligence-v9-63.js",
+        "b": "cartridges/202609041956-substation-intelligence-v9-63.js",
+        "bytesA": 334331,
+        "bytesB": 334529
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609041945-substation-intelligence-v9-63.js",
+        "b": "cartridges/202609041957-substation-intelligence-v9-63.js",
+        "bytesA": 334331,
+        "bytesB": 334774
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609041954-sld-sandbox-v9-8.js",
+        "b": "cartridges/202609050354-sld-sandbox-v9-8.js",
+        "bytesA": 362168,
+        "bytesB": 363011
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609041956-substation-intelligence-v9-63.js",
+        "b": "cartridges/202609041957-substation-intelligence-v9-63.js",
+        "bytesA": 334529,
+        "bytesB": 334774
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609041957-sld-sandbox-v9-8.js",
+        "b": "cartridges/202609050244-sld-sandbox-v9-8.js",
+        "bytesA": 362168,
+        "bytesB": 363011
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609041957-sld-sandbox-v9-8.js",
+        "b": "cartridges/202609050249-sld-sandbox-v9-8.js",
+        "bytesA": 362168,
+        "bytesB": 363011
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609041957-sld-sandbox-v9-8.js",
+        "b": "cartridges/202609050301-sld-sandbox-v9-8.js",
+        "bytesA": 362168,
+        "bytesB": 363011
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609041957-sld-sandbox-v9-8.js",
+        "b": "cartridges/202609050354-sld-sandbox-v9-8.js",
+        "bytesA": 362168,
+        "bytesB": 363011
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609042123-sld-sandbox-v9-8.js",
+        "b": "cartridges/202609050301-sld-sandbox-v9-8.js",
+        "bytesA": 363011,
+        "bytesB": 363011
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609042123-sld-sandbox-v9-8.js",
+        "b": "cartridges/202609050354-sld-sandbox-v9-8.js",
+        "bytesA": 363011,
+        "bytesB": 363011
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609050238-sld-sandbox-v9-8.js",
+        "b": "cartridges/202609050244-sld-sandbox-v9-8.js",
+        "bytesA": 363011,
+        "bytesB": 363011
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609050238-sld-sandbox-v9-8.js",
+        "b": "cartridges/202609050249-sld-sandbox-v9-8.js",
+        "bytesA": 363011,
+        "bytesB": 363011
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609050238-sld-sandbox-v9-8.js",
+        "b": "cartridges/202609050301-sld-sandbox-v9-8.js",
+        "bytesA": 363011,
+        "bytesB": 363011
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609050238-sld-sandbox-v9-8.js",
+        "b": "cartridges/202609051522-sld-sandbox-v9-8.js",
+        "bytesA": 363011,
+        "bytesB": 364209
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609050238-sld-sandbox-v9-8.js",
+        "b": "cartridges/202609051540-sld-sandbox-v9-8.js",
+        "bytesA": 363011,
+        "bytesB": 364209
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609050244-sld-sandbox-v9-8.js",
+        "b": "cartridges/202609050249-sld-sandbox-v9-8.js",
+        "bytesA": 363011,
+        "bytesB": 363011
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609050244-sld-sandbox-v9-8.js",
+        "b": "cartridges/202609050301-sld-sandbox-v9-8.js",
+        "bytesA": 363011,
+        "bytesB": 363011
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609050244-sld-sandbox-v9-8.js",
+        "b": "cartridges/202609051522-sld-sandbox-v9-8.js",
+        "bytesA": 363011,
+        "bytesB": 364209
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609050244-sld-sandbox-v9-8.js",
+        "b": "cartridges/202609051540-sld-sandbox-v9-8.js",
+        "bytesA": 363011,
+        "bytesB": 364209
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609050249-sld-sandbox-v9-8.js",
+        "b": "cartridges/202609050301-sld-sandbox-v9-8.js",
+        "bytesA": 363011,
+        "bytesB": 363011
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609050249-sld-sandbox-v9-8.js",
+        "b": "cartridges/202609050354-sld-sandbox-v9-8.js",
+        "bytesA": 363011,
+        "bytesB": 363011
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609050249-sld-sandbox-v9-8.js",
+        "b": "cartridges/202609051522-sld-sandbox-v9-8.js",
+        "bytesA": 363011,
+        "bytesB": 364209
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609050249-sld-sandbox-v9-8.js",
+        "b": "cartridges/202609051540-sld-sandbox-v9-8.js",
+        "bytesA": 363011,
+        "bytesB": 364209
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609050301-sld-sandbox-v9-8.js",
+        "b": "cartridges/202609050354-sld-sandbox-v9-8.js",
+        "bytesA": 363011,
+        "bytesB": 363011
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609050301-sld-sandbox-v9-8.js",
+        "b": "cartridges/202609051522-sld-sandbox-v9-8.js",
+        "bytesA": 363011,
+        "bytesB": 364209
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609050301-sld-sandbox-v9-8.js",
+        "b": "cartridges/202609051540-sld-sandbox-v9-8.js",
+        "bytesA": 363011,
+        "bytesB": 364209
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609050354-sld-sandbox-v9-8.js",
+        "b": "cartridges/202609051540-sld-sandbox-v9-8.js",
+        "bytesA": 363011,
+        "bytesB": 364209
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609051307-substation-intelligence-v9-63.js",
+        "b": "cartridges/202609051309-substation-intelligence-v9-63.js",
+        "bytesA": 372923,
+        "bytesB": 373701
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609051329-substation-intelligence-v9-63.js",
+        "b": "cartridges/202609051340-substation-intelligence-v9-63.js",
+        "bytesA": 380901,
+        "bytesB": 381123
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609031809-sld-sandbox-v9-8.js",
+        "b": "cartridges/202609040021-sld-sandbox-v9-8.js",
+        "bytesA": 371622,
+        "bytesB": 372078
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609032213-sld-sandbox-v9-8.js",
+        "b": "cartridges/202609040021-sld-sandbox-v9-8.js",
+        "bytesA": 371816,
+        "bytesB": 372078
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609041957-sld-sandbox-v9-8.js",
+        "b": "cartridges/202609042123-sld-sandbox-v9-8.js",
+        "bytesA": 362168,
+        "bytesB": 363011
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609041957-sld-sandbox-v9-8.js",
+        "b": "cartridges/202609050238-sld-sandbox-v9-8.js",
+        "bytesA": 362168,
+        "bytesB": 363011
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609042123-sld-sandbox-v9-8.js",
+        "b": "cartridges/202609051522-sld-sandbox-v9-8.js",
+        "bytesA": 363011,
+        "bytesB": 364209
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609042123-sld-sandbox-v9-8.js",
+        "b": "cartridges/202609051540-sld-sandbox-v9-8.js",
+        "bytesA": 363011,
+        "bytesB": 364209
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609051522-substation-intelligence-v9-63.js",
+        "b": "cartridges/202609051525-substation-intelligence-v9-63.js",
+        "bytesA": 435291,
+        "bytesB": 436778
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609051525-substation-intelligence-v9-63.js",
+        "b": "cartridges/202609051529-substation-intelligence-v9-63.js",
+        "bytesA": 436778,
+        "bytesB": 437928
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609031751-substation-intelligence-v9-63.js",
+        "b": "cartridges/202609031809-substation-intelligence-v9-63.js",
+        "bytesA": 239202,
+        "bytesB": 239404
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609032213-sld-sandbox-v9-8.js",
+        "b": "cartridges/202609032315-sld-sandbox-v9-8.js",
+        "bytesA": 371816,
+        "bytesB": 372078
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609032222-sld-sandbox-v9-8.js",
+        "b": "cartridges/202609032315-sld-sandbox-v9-8.js",
+        "bytesA": 371816,
+        "bytesB": 372078
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609032222-sld-sandbox-v9-8.js",
+        "b": "cartridges/202609040021-sld-sandbox-v9-8.js",
+        "bytesA": 371816,
+        "bytesB": 372078
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609032222-substation-intelligence-v9-63.js",
+        "b": "cartridges/202609032315-substation-intelligence-v9-63.js",
+        "bytesA": 258799,
+        "bytesB": 259054
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609040046-substation-intelligence-v9-63.js",
+        "b": "cartridges/202609040047-substation-intelligence-v9-63.js",
+        "bytesA": 290966,
+        "bytesB": 291279
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609041945-sld-sandbox-v9-8.js",
+        "b": "cartridges/202609041957-sld-sandbox-v9-8.js",
+        "bytesA": 360988,
+        "bytesB": 362168
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609041954-sld-sandbox-v9-8.js",
+        "b": "cartridges/202609042123-sld-sandbox-v9-8.js",
+        "bytesA": 362168,
+        "bytesB": 363011
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609041954-sld-sandbox-v9-8.js",
+        "b": "cartridges/202609050238-sld-sandbox-v9-8.js",
+        "bytesA": 362168,
+        "bytesB": 363011
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609041954-sld-sandbox-v9-8.js",
+        "b": "cartridges/202609050244-sld-sandbox-v9-8.js",
+        "bytesA": 362168,
+        "bytesB": 363011
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609041954-sld-sandbox-v9-8.js",
+        "b": "cartridges/202609050249-sld-sandbox-v9-8.js",
+        "bytesA": 362168,
+        "bytesB": 363011
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609041954-sld-sandbox-v9-8.js",
+        "b": "cartridges/202609050301-sld-sandbox-v9-8.js",
+        "bytesA": 362168,
+        "bytesB": 363011
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609042123-sld-sandbox-v9-8.js",
+        "b": "cartridges/202609050238-sld-sandbox-v9-8.js",
+        "bytesA": 363011,
+        "bytesB": 363011
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609042123-sld-sandbox-v9-8.js",
+        "b": "cartridges/202609050244-sld-sandbox-v9-8.js",
+        "bytesA": 363011,
+        "bytesB": 363011
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609042123-sld-sandbox-v9-8.js",
+        "b": "cartridges/202609050249-sld-sandbox-v9-8.js",
+        "bytesA": 363011,
+        "bytesB": 363011
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609051540-substation-intelligence-v9-63.js",
+        "b": "cartridges/202609051556-substation-intelligence-v9-63.js",
+        "bytesA": 440262,
+        "bytesB": 442354
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609030156-sld-sandbox-v9-8.js",
+        "b": "cartridges/202609030200-sld-sandbox-v9-8.js",
+        "bytesA": 329318,
+        "bytesB": 331797
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609040058-sld-sandbox-v9-8.js",
+        "b": "cartridges/202609040134-sld-sandbox-v9-8.js",
+        "bytesA": 361719,
+        "bytesB": 362128
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609041221-substation-intelligence-v9-63.js",
+        "b": "cartridges/202609041244-substation-intelligence-v9-63.js",
+        "bytesA": 318368,
+        "bytesB": 318745
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609050244-substation-intelligence-v9-63.js",
+        "b": "cartridges/202609050249-substation-intelligence-v9-63.js",
+        "bytesA": 350337,
+        "bytesB": 350992
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609051525-substation-intelligence-v9-63.js",
+        "b": "cartridges/202609051526-substation-intelligence-v9-63.js",
+        "bytesA": 436778,
+        "bytesB": 437674
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609051526-substation-intelligence-v9-63.js",
+        "b": "cartridges/202609051529-substation-intelligence-v9-63.js",
+        "bytesA": 437674,
+        "bytesB": 437928
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609030137-sld-sandbox-v9-8.js",
+        "b": "cartridges/202609030151-sld-sandbox-v9-8.js",
+        "bytesA": 342354,
+        "bytesB": 342578
+      },
+      {
+        "cosine": 1,
+        "a": "cartridges/202609030234-substation-intelligence-v9-63.js",
+        "b": "cartridges/202609031316-substation-intelligence-v9-63.js",
+        "bytesA": 238649,
+        "bytesB": 238945
+      }
+    ]
+  }
+}
