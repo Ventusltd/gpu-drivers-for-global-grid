@@ -194,3 +194,9 @@ lane and on `workflow_dispatch`. It **skips the GPU bench with an explicit
 message**: GitHub-hosted runners have no NVIDIA GPU, and a green tick on a
 benchmark that never ran would be worse than no tick at all. The GPU numbers in
 `results/` can only come from a machine with the card.
+
+One caveat when reading any ladder, CI's included: the wall clock for each rung
+includes worker **start-up**, which is a fixed cost the 1-thread rung pays in
+full and cannot amortise. On a fast runner that can push the 2-thread rung above
+100% efficiency — an artefact of the baseline, not super-linear scaling. It does
+not affect the measured table above, where 1 thread took 73 ms and 2 took 77 ms.
