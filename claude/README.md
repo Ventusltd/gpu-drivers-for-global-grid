@@ -65,6 +65,20 @@ Practices Guide, so the cost of each is a measured delta rather than a belief:
 **Every variant is checked against the CPU ground truth.** A fast wrong answer
 is not a result. All five agreed on 43,820.
 
+### 3. `analyse-corpus-gpu.mjs` — not a benchmark, a question
+
+The first two scripts ask *how fast*. This one asks *what is actually in the
+payload*, and it runs the whole analysis on the GPU:
+
+| | Pass | What it does |
+| --- | --- | --- |
+| 1 | histograms | Per-file 256-bin byte histogram. One workgroup per file, a grid-stride loop over that file's byte range, 256 atomic bins in workgroup memory so the hot atomics stay on-chip, one global write per bin at the end. |
+| 2 | similarity | Pairwise cosine similarity over the N × 256 histogram matrix. One thread per (i,j) pair — N² threads, the shape a GPU is for and the shape that makes a CPU quadratic. |
+
+The host does file I/O, SHA-256 exact-duplicate detection, and **verification of
+pass 1 against a CPU histogram** so a wrong answer cannot pass as a fast one.
+Orchestration and I/O are not analysis; every metric is computed by a shader.
+
 ---
 
 ## Measured: the CPU/RAM ladder
@@ -128,6 +142,73 @@ GPU against CPU:
 
 ---
 
+## Measured: the corpus analysis
+
+A different input from the teleprint: the GridAtlas served tree `atlas/` —
+**223 files, 40,161,723 bytes (38.30 MB)**, `.js`/`.mjs`/`.html`/`.css` only.
+Adapter that answered: `vendor=nvidia architecture=blackwell`, NVIDIA GeForce
+RTX 5070 Laptop GPU.
+
+| Stage | Time | Throughput |
+| --- | ---: | ---: |
+| upload (once) | 37.6 ms | 1019 MB/s host→VRAM |
+| pass 1 histograms | 4.10 ms | 9342 MB/s across 223 files |
+| pass 2 similarity | 40.00 ms | 24,753 pairs |
+
+**Pass 1 verified against the CPU: matches bin for bin.**
+
+This is the High-Priority rule paying again, in a second and unrelated shape.
+The corpus crosses PCIe **once** — 37.6 ms — and both passes then run over a
+resident buffer for 44 ms. Upload once, compute many times.
+
+### What the analysis found
+
+**Exact duplicates — a fact, established on the host by SHA-256:**
+
+**12 groups, 487,454 bytes (0.46 MB) = 1.2% of the corpus.** The largest:
+`ventus-corev8engine.js` appears identically across 5 release directories, and
+`ventusv8.css` is identical across 5.
+
+**The GPU similarity screen — a pointer, not a fact:**
+
+At cosine ≥ 0.99, **11,053 of 24,753 pairs** matched — 77 byte-identical and
+**10,976 near-duplicate but not identical**. They are overwhelmingly successive
+timestamped generations of the same cartridge: `202609031809` / `202609032012` /
+`202609032041` / `202609032213-sld-sandbox-v9-8.js` all sit at cosine 1.00000 at
+363 KB each, and the `substation-intelligence` generations do the same.
+
+### The caveat, stated plainly, because it is the whole point
+
+**Cosine similarity on 256-bin byte histograms is a SCREEN, not a proof of
+duplication.** A low score proves difference. A high score only says *look
+here*. Two 363 KB files scoring 1.00000 share a **byte distribution**, which is
+not the same as sharing bytes — two files can have identical histograms and no
+line in common.
+
+Exact duplication is established **separately**, by SHA-256, and the two numbers
+— **0.46 MB proven** and **10,976 pairs flagged** — are reported separately and
+**must never be conflated or added together.**
+
+In particular: the tempting figure "bytes sitting in near-duplicate pairs:
+**1976 MB**" is **not a payload saving and is not reported as one.** Pairs
+overlap heavily, so one file is counted once for every pair it appears in and
+the sum comes out at fifty times the size of the 38 MB corpus it describes. The
+script prints it with that warning attached and deliberately keeps it out of the
+JSON report so it cannot be mistaken for data. **The only defensible redundancy
+number on this corpus is 0.46 MB.**
+
+The script demonstrates its own caveat when run on its fallback corpus, the
+`claude/` directory itself: `analyse-corpus-gpu.mjs` and `bench-gpu.mjs` score
+**0.99224** against each other. They are two different programs that happen to
+be the same kind of JavaScript. That is the screen behaving exactly as
+described, and it is why a high score is never reported as a duplicate.
+
+What the screen is genuinely good for is *where to look next*: it costs 44 ms to
+narrow 24,753 pairs down to 10,976 candidates, and a real diff — the expensive,
+byte-exact one — then only has to run on those.
+
+---
+
 ## The honest conclusion
 
 **For a single pass over a ~26 MB artefact, the RTX 5070 is not worth it.**
@@ -149,6 +230,12 @@ rule from a good guide is not the same as measuring a gain from it.
 the GPU becomes the right tool only when the data **stays resident** and **many
 passes run over it**. A pipeline that uploads an artefact, does one reduction
 and drops it will be slower than the CPU, however good the kernel is.
+
+The corpus analysis is that same rule seen from the winning side. It uploads
+38.30 MB once for 37.6 ms and then does work whose cost is **quadratic in the
+number of files** — 24,753 cosine similarities — in 40 ms. That is the shape
+where the card earns its place: not a bigger single pass, but an N² pass over
+data already in VRAM.
 
 ### Two environment gotchas, both measured here
 
@@ -176,15 +263,24 @@ node claude/bench-cpu-ram.mjs <artefact.txt> --threads 1,2,4,8,12
 
 # 2. the GPU bench (headed; needs Playwright's Chromium and a WebGPU adapter)
 node claude/bench-gpu.mjs <artefact.txt> --iters 5
+
+# 3. the GPU corpus analysis (headed; same requirements)
+node claude/analyse-corpus-gpu.mjs <corpus-root> --out gpu-analysis --top 25
 ```
 
-The artefact path is optional in both. Resolution order: the first argument,
-then `$BENCH_ARTEFACT`, then `sample-artefact.txt` next to the script.
+The artefact path is optional in the first two. Resolution order: the first
+argument, then `$BENCH_ARTEFACT`, then `sample-artefact.txt` next to the script.
 
-`bench-gpu.mjs` needs Playwright. Set `PLAYWRIGHT_PATH` to an existing
-`playwright/index.js`, or `npm i -D playwright && npx playwright install
-chromium` and it will resolve the bare specifier. `BENCH_CHANNEL=chrome` uses
-installed Chrome instead of Playwright's Chromium.
+The corpus root is optional too: the first argument, then `$CORPUS_ROOT`, then
+the `claude/` directory itself — a small but real corpus, so the analyser runs
+on any machine without the GridAtlas tree present. Numbers from that fallback
+are a smoke test of the harness, **not** the measurements above.
+
+`bench-gpu.mjs` and `analyse-corpus-gpu.mjs` need Playwright. Set
+`PLAYWRIGHT_PATH` to an existing `playwright/index.js`, or `npm i -D playwright
+&& npx playwright install chromium` and they will resolve the bare specifier.
+`BENCH_CHANNEL=chrome` uses installed Chrome instead of Playwright's Chromium
+for `bench-gpu.mjs`.
 
 ### CI
 

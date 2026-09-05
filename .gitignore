@@ -6,6 +6,11 @@ sample-artefact.txt
 *teleprint*.pdf
 *.teleprint
 
+# Output written by claude/analyse-corpus-gpu.mjs --out. The committed copy of
+# a run lives in claude/results/ under a timestamped name; a fresh local run
+# should not silently overwrite or shadow it.
+gpu-analysis/
+
 # Large evidence dumps generally
 evidence/
 *.dump.txt

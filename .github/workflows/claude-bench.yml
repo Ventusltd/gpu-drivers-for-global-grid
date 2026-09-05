@@ -5,12 +5,13 @@
 # It runs claude/bench-cpu-ram.mjs on a GitHub-hosted runner against a
 # generated stand-in artefact, so the harness is proven to still execute.
 #
-# It does NOT run claude/bench-gpu.mjs. GitHub-hosted runners have no NVIDIA
-# GPU — no CUDA device, no WebGPU adapter — so the GPU bench cannot produce a
-# number here. It is SKIPPED with an explicit message rather than run and
-# reported as "no GPU", because a green tick on a benchmark that never
-# measured anything is worse than no tick at all. The RTX 5070 figures in
-# claude/results/ come from a machine that has the card, and only from there.
+# It does NOT run claude/bench-gpu.mjs, and it does NOT run
+# claude/analyse-corpus-gpu.mjs. GitHub-hosted runners have no NVIDIA GPU — no
+# CUDA device, no WebGPU adapter — so neither can produce a number here. Both
+# are SKIPPED with an explicit message rather than run and reported as "no
+# GPU", because a green tick on a benchmark that never measured anything is
+# worse than no tick at all. The RTX 5070 figures in claude/results/ come from
+# a machine that has the card, and only from there.
 #
 # The runner is also not the measurement machine: its numbers are a smoke test
 # of the harness, not evidence about anything. Do not compare them with
@@ -67,14 +68,17 @@ jobs:
       - name: Run the CPU/RAM ladder
         run: node claude/bench-cpu-ram.mjs sample-artefact.txt --threads "${{ github.event.inputs.threads || '1,2,4' }}"
 
-      - name: GPU bench — skipped, and why
+      - name: GPU work — skipped, and why
         run: |
-          echo "::notice title=GPU bench skipped::GitHub-hosted runners have no NVIDIA GPU."
+          echo "::notice title=GPU work skipped::GitHub-hosted runners have no NVIDIA GPU."
           echo "claude/bench-gpu.mjs was NOT run."
+          echo "claude/analyse-corpus-gpu.mjs was NOT run."
           echo "This runner has no CUDA device and no WebGPU adapter, so it cannot"
-          echo "measure the RTX 5070. Running it here would print 'no GPU' and prove"
+          echo "measure the RTX 5070. Running either here would print 'no GPU' and prove"
           echo "nothing about the hardware under test."
           echo "The measured GPU numbers live in claude/results/2026-09-05-gpu-rtx5070.json"
-          echo "and were taken on an NVIDIA GeForce RTX 5070 Laptop GPU (driver 592.02)."
+          echo "and claude/results/corpus-gpu-analysis-202609051700.json, and were taken on"
+          echo "an NVIDIA GeForce RTX 5070 Laptop GPU (driver 592.02)."
           echo "To reproduce them you need that machine, headed Chromium, and:"
           echo "  node claude/bench-gpu.mjs <teleprint.txt> --iters 5"
+          echo "  node claude/analyse-corpus-gpu.mjs <corpus-root> --out gpu-analysis"
