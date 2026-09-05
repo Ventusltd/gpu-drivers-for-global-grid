@@ -12,6 +12,7 @@ parser=argparse.ArgumentParser()
 parser.add_argument('--run',type=Path,required=True)
 parser.add_argument('--schedule',type=Path,required=True)
 parser.add_argument('--out',type=Path,required=True)
+parser.add_argument('--learning',type=Path)
 parser.add_argument('--port',type=int,default=8978)
 args=parser.parse_args()
 args.out.mkdir(parents=True,exist_ok=True)
@@ -27,7 +28,9 @@ def state():
         process=psutil.Process(run['pid'])
         alive=any('overnight.py' in a for a in process.cmdline())
     except psutil.Error: alive=False
-    return {'checkedAt':dt.datetime.now(dt.timezone.utc).isoformat(),'supervisorAlive':alive,'heartbeatAgeSeconds':round(age,1) if age is not None else None,'alert': 'Supervisor absent or heartbeat stale' if not alive or age is None or age>60 else None,'status':s,'verified':sum(v=='verified' for v in plan.get('states',{}).values()),'scopeCount':len(plan.get('states',{})),'planAt':plan.get('at'),'deadlineUTC':dt.datetime.fromtimestamp(deadline,dt.timezone.utc).isoformat()}
+    learning=read(args.learning/'STATUS.json') if args.learning else {}
+    learningFinal=read(args.learning/'FINAL.json') if args.learning else {}
+    return {'checkedAt':dt.datetime.now(dt.timezone.utc).isoformat(),'supervisorAlive':alive,'heartbeatAgeSeconds':round(age,1) if age is not None else None,'alert': 'Supervisor absent or heartbeat stale' if not alive or age is None or age>60 else None,'status':s,'learning':learning,'learningFinal':learningFinal,'verified':sum(v=='verified' for v in plan.get('states',{}).values()),'scopeCount':len(plan.get('states',{})),'planAt':plan.get('at'),'deadlineUTC':dt.datetime.fromtimestamp(deadline,dt.timezone.utc).isoformat()}
 class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         if self.path=='/status.json': payload=json.dumps(state()).encode();kind='application/json'

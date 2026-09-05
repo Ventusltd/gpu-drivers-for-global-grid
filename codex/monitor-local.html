@@ -5,6 +5,7 @@
 <p>Evidence-backed review checkpoints <progress id="review" max="96" value="0"></progress><span id="count"></span></p>
 <p>CPU utilisation <progress id="cpu" max="100" value="0"></progress><span id="cpuLabel"></span></p>
 <p>GPU utilisation <progress id="gpu" max="100" value="0"></progress><span id="gpuLabel"></span></p>
+<p>Repository learning queue <progress id="learning" max="27" value="0"></progress><output id="learningLabel"></output></p>
 <p><output id="detail"></output></p><small>Read-only local monitor. Refreshes every five seconds; independently records heartbeat health every thirty seconds. The existing supervisor handles resource limits and hourly measurements. Elapsed time is not review completion. No claim of CPU thermal protection: no validated CPU temperature sensor is configured.</small>
 <script>
 const el=id=>document.getElementById(id);
@@ -14,6 +15,7 @@ el('mode').textContent=s.active?'Active: '+s.active:s.pauseReason||'No active jo
 el('time').value=s.elapsedSeconds||0;el('elapsed').textContent=Math.floor((s.elapsedSeconds||0)/60)+' / 480 minutes; stops '+d.deadlineUTC;
 el('review').value=d.verified;el('count').textContent=d.verified+' / '+d.scopeCount+' verified; pending checkpoints require engineering review';
 el('cpu').value=m.cpuPercent||0;el('cpuLabel').textContent=(m.cpuPercent??'unknown')+'%';el('gpu').value=m.gpuPercent||0;el('gpuLabel').textContent=(m.gpuPercent??'unknown')+'%';
+const l=d.learning||{},total=(l.completedJobs||0)+(l.failedJobs||0)+(l.queuedNow||0)+(l.active?.length||0);el('learning').max=Math.max(1,total);el('learning').value=l.completedJobs||0;el('learningLabel').textContent='\n'+(l.completedJobs||0)+' jobs completed / '+total+' due so far; '+(l.failedJobs||0)+' failed. '+(l.state||'No learning status')+'\n'+(l.futureHourlySweeps||0)+' further hourly sweeps; deadline '+(l.deadlineUTC||'unknown')+'\n'+(l.active||[]).map(a=>a.repository+': '+a.phase).join('\n')+(l.at&&Date.now()-Date.parse(l.at)>60000?'\nLearning heartbeat stale; inspect process.':'');
 el('detail').textContent='Available RAM: '+Number(m.availableGiB||0).toFixed(2)+' GiB\nGPU temperature: '+(m.gpuTemperature??'unknown')+' C\nGPU memory: '+(m.gpuMemoryUsedMiB??'?')+' / '+(m.gpuMemoryTotalMiB??'?')+' MiB\nCompleted runner jobs: '+s.completed+'; failed jobs: '+s.failed+'\nThese counts do not certify application correctness.';
 }catch{el('health').textContent='MONITOR UNAVAILABLE — displayed values may be stale';}}
 update();setInterval(update,5000);
