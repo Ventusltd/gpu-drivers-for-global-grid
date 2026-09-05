@@ -1,0 +1,41 @@
+{
+  "date": "2026-09-05",
+  "label": "Vikram Kumar's laptop, Ventus Ltd",
+  "measured": true,
+  "cpu": {
+    "model": "Intel Core Ultra 7 255HX",
+    "cores": 20,
+    "logicalProcessors": 20
+  },
+  "memory": {
+    "totalGB": 15.46,
+    "type": "DDR5-6400",
+    "modules": "2 x 8 GB",
+    "freeGBAtStartOfLadder": 4.42
+  },
+  "gpu": {
+    "discrete": {
+      "name": "NVIDIA GeForce RTX 5070 Laptop GPU",
+      "vramMiB": 8151,
+      "driver": "592.02",
+      "computeCapability": "12.0",
+      "webgpuAdapterReported": {
+        "vendor": "nvidia",
+        "architecture": "blackwell",
+        "device": "0x2d58"
+      }
+    },
+    "integrated": "Intel iGPU (present; the reason the answering adapter is printed, never assumed)"
+  },
+  "os": "Windows 11",
+  "node": "v24.19.0",
+  "artefact": {
+    "what": "GridAtlas teleprint source-code dump",
+    "bytes": 27568130,
+    "MB": 26.29,
+    "beginEndMarkers": 112,
+    "equalsBytes": 43820,
+    "committed": false,
+    "why": "evidence, not source; 26 MB does not belong in git"
+  }
+}

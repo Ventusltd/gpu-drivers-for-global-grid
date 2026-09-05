@@ -1,0 +1,80 @@
+# CLAUDE LANE — CPU/RAM benchmark ladder.
+#
+# WHAT THIS RUNS, AND WHAT IT DELIBERATELY DOES NOT.
+#
+# It runs claude/bench-cpu-ram.mjs on a GitHub-hosted runner against a
+# generated stand-in artefact, so the harness is proven to still execute.
+#
+# It does NOT run claude/bench-gpu.mjs. GitHub-hosted runners have no NVIDIA
+# GPU — no CUDA device, no WebGPU adapter — so the GPU bench cannot produce a
+# number here. It is SKIPPED with an explicit message rather than run and
+# reported as "no GPU", because a green tick on a benchmark that never
+# measured anything is worse than no tick at all. The RTX 5070 figures in
+# claude/results/ come from a machine that has the card, and only from there.
+#
+# The runner is also not the measurement machine: its numbers are a smoke test
+# of the harness, not evidence about anything. Do not compare them with
+# claude/results/.
+#
+# This workflow belongs to the claude/ lane only. It touches no other lane.
+
+name: claude lane — CPU/RAM bench
+
+on:
+  push:
+    branches:
+      - 'claude/**'
+    paths:
+      - 'claude/**'
+      - '.github/workflows/claude-bench.yml'
+  pull_request:
+    paths:
+      - 'claude/**'
+      - '.github/workflows/claude-bench.yml'
+  workflow_dispatch:
+    inputs:
+      threads:
+        description: 'Thread ladder, comma separated'
+        required: false
+        default: '1,2,4'
+      sizeMB:
+        description: 'Stand-in artefact size in MB'
+        required: false
+        default: '26'
+
+jobs:
+  cpu-ram:
+    name: CPU/RAM ladder (no GPU on this runner)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Syntax-check every benchmark script
+        run: |
+          for f in claude/*.mjs; do
+            node --check "$f"
+            echo "node --check OK  $f"
+          done
+
+      - name: Generate a stand-in artefact
+        # The real 26 MB teleprint is evidence, not source, and is not committed.
+        run: node claude/make-sample-artefact.mjs sample-artefact.txt "${{ github.event.inputs.sizeMB || '26' }}"
+
+      - name: Run the CPU/RAM ladder
+        run: node claude/bench-cpu-ram.mjs sample-artefact.txt --threads "${{ github.event.inputs.threads || '1,2,4' }}"
+
+      - name: GPU bench — skipped, and why
+        run: |
+          echo "::notice title=GPU bench skipped::GitHub-hosted runners have no NVIDIA GPU."
+          echo "claude/bench-gpu.mjs was NOT run."
+          echo "This runner has no CUDA device and no WebGPU adapter, so it cannot"
+          echo "measure the RTX 5070. Running it here would print 'no GPU' and prove"
+          echo "nothing about the hardware under test."
+          echo "The measured GPU numbers live in claude/results/2026-09-05-gpu-rtx5070.json"
+          echo "and were taken on an NVIDIA GeForce RTX 5070 Laptop GPU (driver 592.02)."
+          echo "To reproduce them you need that machine, headed Chromium, and:"
+          echo "  node claude/bench-gpu.mjs <teleprint.txt> --iters 5"
