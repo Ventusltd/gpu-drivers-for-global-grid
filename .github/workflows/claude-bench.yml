@@ -6,7 +6,7 @@
 # generated stand-in artefact, so the harness is proven to still execute.
 #
 # It does NOT run claude/bench-gpu.mjs, and it does NOT run
-# claude/analyse-corpus-gpu.mjs. GitHub-hosted runners have no NVIDIA GPU — no
+# claude/analyse-corpus-gpu.mjs. GitHub-hosted runners have no discrete GPU — no
 # CUDA device, no WebGPU adapter — so neither can produce a number here. Both
 # are SKIPPED with an explicit message rather than run and reported as "no
 # GPU", because a green tick on a benchmark that never measured anything is
@@ -70,7 +70,7 @@ jobs:
 
       - name: GPU work — skipped, and why
         run: |
-          echo "::notice title=GPU work skipped::GitHub-hosted runners have no NVIDIA GPU."
+          echo "::notice title=GPU work skipped::GitHub-hosted runners have no discrete GPU."
           echo "claude/bench-gpu.mjs was NOT run."
           echo "claude/analyse-corpus-gpu.mjs was NOT run."
           echo "This runner has no CUDA device and no WebGPU adapter, so it cannot"
@@ -78,7 +78,7 @@ jobs:
           echo "nothing about the hardware under test."
           echo "The measured GPU numbers live in claude/results/2026-09-05-gpu-rtx5070.json"
           echo "and claude/results/corpus-gpu-analysis-202609051700.json, and were taken on"
-          echo "an NVIDIA GeForce RTX 5070 Laptop GPU (driver 592.02)."
+          echo "a GeForce RTX 5070 Laptop GPU (driver 592.02)."
           echo "To reproduce them you need that machine, headed Chromium, and:"
           echo "  node claude/bench-gpu.mjs <teleprint.txt> --iters 5"
           echo "  node claude/analyse-corpus-gpu.mjs <corpus-root> --out gpu-analysis"

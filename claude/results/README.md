@@ -7,11 +7,11 @@ taken on one named machine on one named artefact.
 | --- | --- |
 | `2026-09-05-machine.json` | The box, the two GPUs, the driver, and the artefact these runs ate |
 | `2026-09-05-cpu-ram-ladder.json` | Single-thread phase timings and the 1/2/4/8/12-thread ladder |
-| `2026-09-05-gpu-rtx5070.json` | The five NVIDIA-rule variants, the adapter that answered, and the CPU comparison |
+| `2026-09-05-gpu-rtx5070.json` | The five rule variants, the adapter that answered, and the CPU comparison |
 | `corpus-gpu-analysis-202609051700.json` | The GPU corpus analysis: two-pass timings, the SHA-256 duplicate groups, and the top 100 near-duplicate pairs from the similarity screen |
 
 **Machine:** Intel Core Ultra 7 255HX (20 cores / 20 logical), 15.46 GB
-DDR5-6400 (2 x 8 GB), NVIDIA GeForce RTX 5070 Laptop GPU (8151 MiB, driver
+DDR5-6400 (2 x 8 GB), GeForce RTX 5070 Laptop GPU (8151 MiB, driver
 592.02, compute capability 12.0) alongside an Intel iGPU. Node v24.19.0,
 Windows 11.
 
