@@ -1,0 +1,81 @@
+name: Finish pinned repository learning
+on:
+  push:
+    branches: ['codex/20260906-finish-learning']
+    paths: ['codex/cloud-learning*', 'codex/learning-queue-20260906.json', '.github/workflows/codex-finish-learning.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: codex-finish-learning-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  prepare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      matrix: ${{ steps.queue.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Test evidence boundaries
+        run: python3 -B codex/cloud-learning.test.py
+      - id: queue
+        run: echo "matrix=$(python3 codex/cloud-learning.py --matrix)" >> "$GITHUB_OUTPUT"
+  learn:
+    needs: prepare
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix: ${{ fromJSON(needs.prepare.outputs.matrix) }}
+    env:
+      OPENBLAS_NUM_THREADS: '2'
+      OMP_NUM_THREADS: '2'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install numpy==2.5.2
+      - name: Checkout public pinned source only
+        uses: actions/checkout@v4
+        with:
+          repository: Ventusltd/${{ matrix.repository }}
+          ref: ${{ matrix.commit }}
+          path: owners/${{ matrix.repository }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Finish queued job and verify provenance
+        env:
+          REPOSITORY: ${{ matrix.repository }}
+        run: python -B codex/cloud-learning.py --repository "$REPOSITORY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: learning-${{ matrix.repository }}
+          path: artifacts/
+          if-no-files-found: error
+          retention-days: 7
+  finish:
+    needs: learn
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: learning-*
+          path: downloaded
+      - run: python3 -B codex/cloud-learning.py --collect downloaded --out final
+      - uses: actions/upload-artifact@v4
+        with:
+          name: learning-completion
+          path: final/
+          retention-days: 30
