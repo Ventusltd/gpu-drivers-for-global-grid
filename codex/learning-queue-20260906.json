@@ -1,0 +1,239 @@
+{
+  "schema": "ventus.learning-cloud-queue.v1",
+  "scope": "Drain publicly reproducible queued jobs; regenerate models from public commits. No local source/model upload. Lexical evidence only.",
+  "jobs": [
+    {
+      "repository": "globalgrid2050",
+      "commit": "df21616eb21fe74969495702c2ed883fb91d4ceb",
+      "seed": 3,
+      "mode": "learn",
+      "public": true
+    },
+    {
+      "repository": "spiders",
+      "commit": "dc76a933bb3a247651673e26e7d71ec781e06fa1",
+      "seed": 3,
+      "mode": "learn",
+      "public": true
+    },
+    {
+      "repository": "pipelinenews",
+      "commit": "5d8b2ae49cdb66af3615e137afe8be18f7dae192",
+      "seed": 3,
+      "mode": "stability",
+      "public": true,
+      "baselineSeed": 0,
+      "expectedSelected": 604,
+      "expectedDimensions": 2048,
+      "expectedFilesSha256": "a081a12163c2918cd5286de6693c9e2b0155d9fab516a079f3aa64fe9b54064d"
+    },
+    {
+      "repository": "gridatlas",
+      "commit": "3061dfcc890184de0158494175268d38ae64e3b3",
+      "seed": 3,
+      "mode": "stability",
+      "public": true,
+      "baselineSeed": 0,
+      "expectedSelected": 316,
+      "expectedDimensions": 2048,
+      "expectedFilesSha256": "b252362b55ce7615163d7a3194b3994e3fd7a27f3bb8d35f6094540c7ad93b2e"
+    },
+    {
+      "repository": "ventus-grid-engine",
+      "commit": "8db9df3c8a9e4b26f74b29abb2fbadfc40aed4e7",
+      "seed": 3,
+      "mode": "learn",
+      "public": true
+    },
+    {
+      "repository": "grid-distance-maths",
+      "commit": "30aa4e0456f95f084aa4ca7a234c610546eaf020",
+      "seed": 3,
+      "mode": "stability",
+      "public": true,
+      "baselineSeed": 0,
+      "expectedSelected": 6,
+      "expectedDimensions": 871,
+      "expectedFilesSha256": "a272bb7a006398afd55fdaef428326fc14b9476b9cbaa362ad56d442adc13a7a"
+    },
+    {
+      "repository": "gpu-drivers-for-global-grid",
+      "commit": "31e1bcf86285a0749ca3dd8167c40efadf14cdcb",
+      "seed": 3,
+      "mode": "learn",
+      "public": true
+    },
+    {
+      "repository": "data-federation-map-for-globalgrid2050-all-repos",
+      "commit": "b759a7d2b5ec0dcc233c27db813ceadc5469157d",
+      "seed": 3,
+      "mode": "stability",
+      "public": true,
+      "baselineSeed": 0,
+      "expectedSelected": 25,
+      "expectedDimensions": 1386,
+      "expectedFilesSha256": "2d9a1781cb720c8812c58cae0466b4949cd55119c52e5b1c03d5e721dbe20979"
+    },
+    {
+      "repository": "data-grid-gb",
+      "commit": "b91e45b231464c24339f5a58b81e6b1eb4c8b47f",
+      "seed": 3,
+      "mode": "stability",
+      "public": true,
+      "baselineSeed": 0,
+      "expectedSelected": 9,
+      "expectedDimensions": 789,
+      "expectedFilesSha256": "a48961a40affc3626310cd9210faf8e47c74d6743263014bf32344cae5ecb30b"
+    },
+    {
+      "repository": "data-gridatlas",
+      "commit": "8bf88da9e210ce9f61dc0398869d3369f3fa2445",
+      "seed": 3,
+      "mode": "stability",
+      "public": true,
+      "baselineSeed": 0,
+      "expectedSelected": 24,
+      "expectedDimensions": 1546,
+      "expectedFilesSha256": "63b11b28f8787176450610cba4170afc9c67b34ef0a80f018c4ead0cd94f052c"
+    },
+    {
+      "repository": "data-gb-electricity",
+      "commit": "49691bcf2762b071b63b0c9604ea1342fd7f86d3",
+      "seed": 3,
+      "mode": "stability",
+      "public": true,
+      "baselineSeed": 0,
+      "expectedSelected": 14,
+      "expectedDimensions": 843,
+      "expectedFilesSha256": "91a7aacf631cbd1742e6c0c919b5cfd2b3927708c78939b8f089c7c9b4adcc00"
+    },
+    {
+      "repository": "companies",
+      "commit": "ac70a37408d4f434e89e8a80cc36d40e450d3cfb",
+      "seed": 3,
+      "mode": "stability",
+      "public": true,
+      "baselineSeed": 0,
+      "expectedSelected": 61,
+      "expectedDimensions": 1817,
+      "expectedFilesSha256": "355f967fbc9dae721281568537fc32c196fa613675a8ad90061b8c988be3d8df"
+    },
+    {
+      "repository": "data-centres-gb",
+      "commit": "f9f47286fae63872375c558fc89ff4b1793914e4",
+      "seed": 3,
+      "mode": "stability",
+      "public": true,
+      "baselineSeed": 0,
+      "expectedSelected": 16,
+      "expectedDimensions": 966,
+      "expectedFilesSha256": "59d0b3e0fa3272ba6afcaa6b80194137687a11fe10b1f1f338e04a6ec93e3377"
+    },
+    {
+      "repository": "data-interconnectors",
+      "commit": "1e00d0e4d7bf3ddbc86224b3b6be5c2f3eaabf86",
+      "seed": 3,
+      "mode": "stability",
+      "public": true,
+      "baselineSeed": 0,
+      "expectedSelected": 3,
+      "expectedDimensions": 350,
+      "expectedFilesSha256": "14d7bcbebc40bf9fbff562bdf7a0d870bf9c8966d23776c44bdde576e88e4918"
+    },
+    {
+      "repository": "gb-electricity-ui",
+      "commit": "5b4533914bb2bcad7f5ea697af00faf67cf626cc",
+      "seed": 3,
+      "mode": "stability",
+      "public": true,
+      "baselineSeed": 0,
+      "expectedSelected": 10,
+      "expectedDimensions": 422,
+      "expectedFilesSha256": "aab9c5a98adb744169c57b48f6be93badeeaa25d3b254ae3237616c780ec8045"
+    },
+    {
+      "repository": "linux-for-the-power-grid",
+      "commit": "b984303b3d9ec104c92d754b8fd6207af021fef8",
+      "seed": 3,
+      "mode": "stability",
+      "public": true,
+      "baselineSeed": 0,
+      "expectedSelected": 5,
+      "expectedDimensions": 555,
+      "expectedFilesSha256": "adce9fe08833594e35638585c0465bc6d69f75ad0b5c3eefd7266ba1757f1cb9"
+    },
+    {
+      "repository": "layout-tool",
+      "commit": "5c450e27e430d6eb5d80070f794a5660f30015a1",
+      "seed": 3,
+      "mode": "stability",
+      "public": true,
+      "baselineSeed": 0,
+      "expectedSelected": 9,
+      "expectedDimensions": 379,
+      "expectedFilesSha256": "53e3e9859645b51f3638230796df5acf9e2116bd21fe5fee69d25f7ef4999341"
+    },
+    {
+      "repository": "cable-trench-or-drill",
+      "commit": "85929edd9815a4fe6ff972f880513654a5440fa9",
+      "seed": 3,
+      "mode": "stability",
+      "public": true,
+      "baselineSeed": 0,
+      "expectedSelected": 10,
+      "expectedDimensions": 440,
+      "expectedFilesSha256": "82c977e000f7e4d7e447f7fa85f407cab2adbda9c286ac2cef6b7eeeab8fe19b"
+    },
+    {
+      "repository": "teleprinter",
+      "commit": "142163d591ab2cafbe36806f12e6f3607740f4c7",
+      "seed": 3,
+      "mode": "stability",
+      "public": true,
+      "baselineSeed": 0,
+      "expectedSelected": 59,
+      "expectedDimensions": 2048,
+      "expectedFilesSha256": "bd1d5a5d85366322fa1bf0ba5820fce648aa2c8893d54a82d1b2b1be9f6ec5c1"
+    },
+    {
+      "repository": "testcode",
+      "commit": "3a4070b39c7bacce2c12bcf5435b268567338dc4",
+      "seed": 3,
+      "mode": "stability",
+      "public": true,
+      "baselineSeed": 0,
+      "expectedSelected": 39,
+      "expectedDimensions": 1487,
+      "expectedFilesSha256": "39efaaec9197b256b25c5be91df18db15d0388048fa097bb660ef482c6681984"
+    },
+    {
+      "repository": "claude",
+      "commit": "ffc7d2baed34b026e1da010af5bfad1132d7d129",
+      "seed": 3,
+      "mode": "learn",
+      "public": true
+    },
+    {
+      "repository": "studies",
+      "commit": "6caf90f27d04473378b759513280e51537f85f7a",
+      "seed": 3,
+      "mode": "stability",
+      "public": true,
+      "baselineSeed": 0,
+      "expectedSelected": 0,
+      "expectedDimensions": 0,
+      "expectedFilesSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "repository": "globalgrid2050-homepage",
+      "commit": "13055b1906e4a72dbcf7405d31fd12219607d622",
+      "seed": 3,
+      "mode": "stability",
+      "public": true,
+      "baselineSeed": 0,
+      "expectedSelected": 6,
+      "expectedDimensions": 289,
+      "expectedFilesSha256": "e830f495000ef9de347802ed52a8ff10413e19e38bbed2d90c2ec68e17fef66a"
+    }
+  ]
+}
