@@ -112,6 +112,17 @@ of bandwidth and headroom long before it ran out of them.
 
 ## Measured: the RTX 5070
 
+Measurement-scope correction, 2026-09-06: the historical `endToEndMs` field and
+tables below added upload plus kernel time. They excluded result readback and,
+for resident variant E, its initial upload. Retain these as historical stage
+timings; the reported x3.15 is not a complete end-to-end speedup. The corrected
+harness records full iteration wall time through readback, records resident
+setup separately, and divides setup plus all iteration wall times by the number
+of iterations. It selects the fastest compute and fastest full-operation variants
+independently. File I/O, browser startup, pipeline creation and CPU verification
+remain outside this explicitly named GPU operation timing. Historical raw JSON
+is unchanged and cannot be used to reconstruct omitted costs.
+
 Adapter that actually answered: `vendor=nvidia architecture=blackwell
 device=0x2d58` — printed, not assumed.
 

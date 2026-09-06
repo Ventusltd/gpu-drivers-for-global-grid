@@ -23,8 +23,9 @@ routes is evidence; two lanes sharing code is not.
 
 On a 26.29 MB text artefact the RTX 5070 **loses end-to-end** to a single line of
 `Buffer.indexOf` (x0.38) — the PCIe upload costs more than the whole CPU parse.
-Only the guide's High-Priority "minimise host↔device transfer" rule paid off: keep
-the buffer resident and run many kernels, and it is x3.15. Full tables, the
+The legacy resident comparison was x3.15 against its baseline stage total, but
+excluded resident setup and result readback. It is not a complete end-to-end
+speedup. The corrected harness measures those costs explicitly. Full tables, the
 variants that turned out to be noise, and the two Chromium/WebGPU gotchas are in
 [`claude/README.md`](claude/README.md); the raw measured JSON is in
 [`claude/results/`](claude/results/).
