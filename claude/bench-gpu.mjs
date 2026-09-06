@@ -39,6 +39,7 @@
  * ./sample-artefact.txt next to this file (make-sample-artefact.mjs writes one).
  */
 import { readFileSync, existsSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { pathToFileURL, fileURLToPath } from 'node:url';
 import path from 'node:path';
 
@@ -63,8 +64,12 @@ function resolveArtefact() {
 const file = resolveArtefact();
 const ii = process.argv.indexOf('--iters');
 const ITERS = ii > 0 ? Number(process.argv[ii + 1]) : 5;
+if (!Number.isInteger(ITERS) || ITERS < 2 || ITERS > 100) { console.error('--iters must be an integer from 2 to 100 (one warm-up plus measured iterations).'); process.exit(2); }
 
 const buf = readFileSync(file);
+if (!buf.length) { console.error('Choose a non-empty artefact.'); process.exit(2); }
+const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
+const provenance = {inputSha256: sha256(buf), bytes: buf.length, harnessSha256: sha256(readFileSync(fileURLToPath(import.meta.url)))};
 const MB = buf.length / 1048576;
 console.log(`file  ${file}`);
 console.log(`bytes ${buf.length} (${MB.toFixed(2)} MB)`);
@@ -79,6 +84,7 @@ t0 = process.hrtime.bigint();
 let n = 0, at = -1;
 while ((at = buf.indexOf(0x3d, at + 1)) !== -1) n += 1;
 const cpuIndexOfMs = Number(process.hrtime.bigint() - t0) / 1e6;
+if (n !== cpuCount) throw Error('CPU reference counts disagree');
 console.log(`CPU scalar  count '=' : ${cpuCount} in ${cpuScalarMs.toFixed(1)}ms (${(MB / (cpuScalarMs / 1000)).toFixed(0)} MB/s)`);
 console.log(`CPU indexOf count '=' : ${n} in ${cpuIndexOfMs.toFixed(1)}ms (${(MB / (cpuIndexOfMs / 1000)).toFixed(0)} MB/s)`);
 
@@ -110,7 +116,8 @@ await page.route('https://bench.local/**', route => {
 });
 await page.goto('https://bench.local/index.html');
 
-const result = await page.evaluate(async (iters) => {
+let result;
+try { result = await page.evaluate(async (iters) => {
   if (!navigator.gpu) return { error: 'navigator.gpu is undefined: WebGPU not exposed in this Chromium' };
   const adapter = await navigator.gpu.requestAdapter({ powerPreference: 'high-performance' });
   if (!adapter) return { error: 'requestAdapter returned null: no WebGPU adapter' };
@@ -119,7 +126,8 @@ const result = await page.evaluate(async (iters) => {
   const device = await adapter.requestDevice({ requiredLimits: {
     maxStorageBufferBindingSize: L.maxStorageBufferBindingSize,
     maxBufferSize: L.maxBufferSize } });
-  device.addEventListener?.('uncapturederror', e => console.log('uncaptured: ' + e.error.message));
+  const errors = [];
+  device.addEventListener('uncapturederror', e => errors.push(e.error.message));
 
   const raw = new Uint8Array(await (await fetch('/payload.bin')).arrayBuffer());
   /* Guide: batch many small transfers into ONE larger transfer. The whole
@@ -262,10 +270,10 @@ fn gridstride(@builtin(global_invocation_id) g : vec3<u32>, @builtin(local_invoc
       await device.queue.onSubmittedWorkDone();
       const uploadMs = performance.now() - tu;
       const d = await dispatch(pipeline, b, groups);
-      runs.push({ uploadMs, computeMs: d.ms, count: d.count });
       b.destroy?.();
+      runs.push({ uploadMs, computeMs: d.ms, endToEndMs: performance.now() - tu, count: d.count });
     }
-    variants.push({ name, note, groups, threads: groups * WG, runs });
+    variants.push({ name, note, groups, threads: groups * WG, setupMs: 0, runs });
   }
 
   await measure('A baseline  writeBuffer + u32/thread', 'guide rule: none applied beyond one batched transfer',
@@ -279,28 +287,43 @@ fn gridstride(@builtin(global_invocation_id) g : vec3<u32>, @builtin(local_invoc
 
   /* E: Guide High Priority -- minimise host<->device transfer. Upload ONCE,
      then run the kernel `iters` times on the resident buffer. */
+  const residentStart = performance.now();
   const resident = newSrcMapped();
   await device.queue.onSubmittedWorkDone();
+  const residentSetupMs = performance.now() - residentStart;
   const residentRuns = [];
   for (let i = 0; i < iters; i++) {
+    const start = performance.now();
     const d = await dispatch(pVec, resident, Math.ceil(quads / WG));
-    residentRuns.push({ uploadMs: 0, computeMs: d.ms, count: d.count });
+    residentRuns.push({ uploadMs: 0, computeMs: d.ms, endToEndMs: performance.now() - start, count: d.count });
   }
   variants.push({ name: 'E resident  upload once, N kernels', note: 'Guide High Priority: minimise host<->device transfer',
-    groups: Math.ceil(quads / WG), threads: Math.ceil(quads / WG) * WG, runs: residentRuns });
+    groups: Math.ceil(quads / WG), threads: Math.ceil(quads / WG) * WG, setupMs: residentSetupMs, runs: residentRuns });
 
   return {
     adapter: { vendor: info.vendor, architecture: info.architecture, device: info.device, description: info.description },
     limits: { maxBufferSize: L.maxBufferSize, maxStorageBufferBindingSize: L.maxStorageBufferBindingSize,
       maxComputeInvocationsPerWorkgroup: L.maxComputeInvocationsPerWorkgroup,
       maxComputeWorkgroupsPerDimension: L.maxComputeWorkgroupsPerDimension },
-    bytes: raw.length, paddedBytes: padded.byteLength, workgroupSize: WG, variants
+    bytes: raw.length, paddedBytes: padded.byteLength, workgroupSize: WG, variants, errors
   };
-}, ITERS);
-
-await browser.close();
+}, ITERS); } finally { await browser.close(); }
 
 if (result.error) { console.log('\nGPU UNAVAILABLE: ' + result.error); process.exit(1); }
+try {
+  if (result.errors?.length) throw Error('WebGPU errors: ' + result.errors.join('; '));
+  if (result.bytes !== buf.length || result.paddedBytes !== Math.ceil(buf.length / 16) * 16) throw Error('Input length mismatch');
+  if (!Array.isArray(result.variants) || result.variants.length !== 5) throw Error('Expected all five variants');
+  for (const [index, variant] of result.variants.entries()) {
+    if (!variant.name.startsWith('ABCDE'[index]) || !Number.isFinite(variant.setupMs) || variant.setupMs < 0) throw Error('Invalid variant identity or setup timing');
+    if (!Array.isArray(variant.runs) || variant.runs.length !== ITERS) throw Error('Incomplete iteration readback');
+    for (const [i, run] of variant.runs.entries()) {
+      if (run.count !== cpuCount) throw Error(`${variant.name} iteration ${i + 1} count differs from CPU`);
+      for (const key of ['uploadMs', 'computeMs', 'endToEndMs']) if (!Number.isFinite(run[key]) || run[key] < 0) throw Error('Invalid timing: ' + key);
+      if (run.endToEndMs < Math.max(run.uploadMs, run.computeMs)) throw Error('Measured total cannot be smaller than a contained stage');
+    }
+  }
+} catch (error) { console.error('GPU BENCHMARK REJECTED: ' + error.message); process.exit(1); }
 
 console.log('\n=== THE ADAPTER THAT ACTUALLY ANSWERED (MEASURED) ===');
 console.log(JSON.stringify(result.adapter, null, 1));
@@ -314,9 +337,11 @@ for (const v of result.variants) {
   const mean = k => warm.reduce((a, r) => a + r[k], 0) / warm.length;
   const up = mean('uploadMs'), co = mean('computeMs');
   const ok = v.runs.every(r => r.count === cpuCount);
+  const totalMs = v.setupMs + v.runs.reduce((sum, run) => sum + run.endToEndMs, 0);
   rows.push({ name: v.name, note: v.note, threads: v.threads, uploadMs: +up.toFixed(2), computeMs: +co.toFixed(3),
     uploadMBps: up ? Math.round(MB / (up / 1000)) : null, computeMBps: Math.round(MB / (co / 1000)),
-    endToEndMs: +(up + co).toFixed(2), correct: ok, count: v.runs[0].count });
+    timedStagesMs: +(up + co).toFixed(3), endToEndMs: +(totalMs / v.runs.length).toFixed(3), setupMs: v.setupMs,
+    totalMs, iterations: v.runs.length, runs: v.runs, correct: ok, count: v.runs[0].count });
   console.log(`${v.name.padEnd(38)} threads ${String(v.threads).padStart(8)}`
     + `  upload ${up.toFixed(2).padStart(7)}ms ${up ? String(Math.round(MB / (up / 1000))).padStart(6) + ' MB/s' : '     -     '}`
     + `  compute ${co.toFixed(3).padStart(7)}ms ${String(Math.round(MB / (co / 1000))).padStart(6)} MB/s`
@@ -332,13 +357,16 @@ for (const r of rows.slice(1)) {
 
 console.log('\n=== GPU vs CPU ON THE SAME ARTEFACT (MEASURED) ===');
 const best = rows.reduce((a, b) => (b.computeMs < a.computeMs ? b : a));
+const bestEnd = rows.reduce((a, b) => (b.endToEndMs < a.endToEndMs ? b : a));
 console.log(`CPU scalar loop           ${cpuScalarMs.toFixed(1)}ms  (${(MB / (cpuScalarMs / 1000)).toFixed(0)} MB/s)`);
 console.log(`CPU Buffer.indexOf        ${cpuIndexOfMs.toFixed(1)}ms  (${(MB / (cpuIndexOfMs / 1000)).toFixed(0)} MB/s)`);
 console.log(`GPU best compute-only     ${best.computeMs.toFixed(3)}ms  (${best.computeMBps} MB/s)  [${best.name.trim()}]`);
-console.log(`GPU best end-to-end       ${best.endToEndMs.toFixed(2)}ms  (upload included)`);
+console.log(`GPU best end-to-end       ${bestEnd.endToEndMs.toFixed(3)}ms  [${bestEnd.name.trim()}] (setup + all iteration wall times, divided by iteration count; includes upload, reset, dispatch and readback)`);
 console.log(`\ncompute-only  GPU vs CPU scalar   x${(cpuScalarMs / best.computeMs).toFixed(1)}`);
 console.log(`compute-only  GPU vs CPU indexOf  x${(cpuIndexOfMs / best.computeMs).toFixed(1)}`);
-console.log(`end-to-end    GPU vs CPU scalar   x${(cpuScalarMs / best.endToEndMs).toFixed(2)}`);
-console.log(`end-to-end    GPU vs CPU indexOf  x${(cpuIndexOfMs / best.endToEndMs).toFixed(2)}`);
+console.log(`end-to-end    GPU vs CPU scalar   x${(cpuScalarMs / bestEnd.endToEndMs).toFixed(2)}`);
+console.log(`end-to-end    GPU vs CPU indexOf  x${(cpuIndexOfMs / bestEnd.endToEndMs).toFixed(2)}`);
 
-console.log('\nJSON ' + JSON.stringify({ cpuScalarMs, cpuIndexOfMs, cpuCount, adapter: result.adapter, rows }));
+console.log('\nJSON ' + JSON.stringify({ provenance, cpuScalarMs, cpuIndexOfMs, cpuCount, adapter: result.adapter, rows,
+  bestComputeVariant: best.name, bestEndToEndVariant: bestEnd.name,
+  timingScope: 'Compute/upload columns discard iteration 1. endToEndMs includes setup and every measured iteration, including readback, divided by count. File I/O, browser startup, pipeline creation and CPU verification are outside this GPU operation timing.' }));

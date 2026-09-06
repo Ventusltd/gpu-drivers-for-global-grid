@@ -1,0 +1,24 @@
+name: GPU benchmark acceptance and accounting
+on:
+  push:
+    branches: ['codex/gpu-benchmark-integrity-20260906']
+  pull_request:
+    paths:
+      - 'claude/bench-gpu.mjs'
+      - 'claude/benchmark-integrity.test.mjs'
+      - '.github/workflows/benchmark-integrity.yml'
+permissions:
+  contents: read
+jobs:
+  synthetic-results:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24'
+      - name: Verify synthetic readback rejection and full operation accounting
+        run: node --test claude/benchmark-integrity.test.mjs
