@@ -83,10 +83,17 @@ if (files.length === 0) {
 const bufs = files.map(f => readFileSync(f));
 const sizes = bufs.map(b => b.length);
 const total = sizes.reduce((a, b) => a + b, 0);
+if (total === 0) { console.error('Corpus contains only empty files; no GPU payload to analyse.'); process.exit(2); }
 const offsets = [];
 let acc = 0;
 for (const s of sizes) { offsets.push(acc); acc += s; }
 const corpus = Buffer.concat(bufs);
+const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
+const provenance = {
+  harnessSha256: sha256(readFileSync(fileURLToPath(import.meta.url))),
+  corpusSha256: sha256(corpus),
+  files: files.map((file, i) => ({path: path.relative(root, file).split(path.sep).join('/'), bytes: sizes[i], sha256: sha256(bufs[i])}))
+};
 console.log(`root  ${root}`);
 console.log(`files ${files.length}`);
 console.log(`bytes ${total.toLocaleString()} (${(total / 1048576).toFixed(2)} MB)`);
@@ -141,6 +148,8 @@ const gpu = await page.evaluate(async ({ offsets, sizes, n }) => {
   const L = adapter.limits;
   const device = await adapter.requestDevice({ requiredLimits: {
     maxStorageBufferBindingSize: L.maxStorageBufferBindingSize, maxBufferSize: L.maxBufferSize } });
+  const errors = [];
+  device.addEventListener('uncapturederror', event => errors.push(event.error.message));
 
   const raw = new Uint8Array(await (await fetch('/corpus.bin')).arrayBuffer());
   const words = Math.ceil(raw.length / 4);
@@ -260,8 +269,8 @@ fn main(@builtin(global_invocation_id) g : vec3<u32>) {
   const simOut = new Float32Array(await read(simBuf, n * n * 4));
 
   return {
-    adapter: { vendor: info.vendor, architecture: info.architecture, description: info.description },
-    uploadMs, histMs, simMs, pairs: (n * (n - 1)) / 2,
+    adapter: { vendor: info.vendor, architecture: info.architecture, device: info.device, description: info.description },
+    uploadMs, histMs, simMs, pairs: (n * (n - 1)) / 2, errors,
     hist: Array.from(histOut), sim: Array.from(simOut)
   };
 }, { offsets, sizes, n: files.length });
@@ -269,9 +278,44 @@ fn main(@builtin(global_invocation_id) g : vec3<u32>) {
 await browser.close();
 if (gpu.error) { console.log('GPU UNAVAILABLE: ' + gpu.error); process.exit(1); }
 
-/* VERIFY pass 1 against the CPU. A fast wrong histogram is not a result. */
-let histAgrees = true;
-for (let i = 0; i < cpuHist.length; i++) if (cpuHist[i] !== gpu.hist[i]) { histAgrees = false; break; }
+/* Verify both readbacks before publishing measurements or similarity candidates.
+   This host-side reference is outside the measured GPU stages. The shader uses
+   f32; 2e-5 is the declared absolute cosine tolerance, not exact equality or a
+   guarantee for threshold classification inside that band. */
+function verifyReadback() {
+  if (gpu.errors?.length) throw Error('WebGPU errors: ' + gpu.errors.join('; '));
+  for (const key of ['uploadMs', 'histMs', 'simMs']) if (!Number.isFinite(gpu[key]) || gpu[key] < 0) throw Error('Invalid measured duration: ' + key);
+  if (gpu.pairs !== files.length * (files.length - 1) / 2) throw Error('Pair count mismatch');
+  if (!Array.isArray(gpu.hist) || gpu.hist.length !== cpuHist.length) throw Error('Histogram readback length mismatch');
+  for (let i = 0; i < cpuHist.length; i++) if (gpu.hist[i] !== cpuHist[i]) throw Error(`Histogram differs from CPU at bin ${i}`);
+  const n = files.length, tolerance = 2e-5;
+  if (!Array.isArray(gpu.sim) || gpu.sim.length !== n * n) throw Error('Similarity readback length mismatch');
+  const norms = new Float64Array(n);
+  for (let i = 0; i < n; i++) for (let k = 0; k < 256; k++) norms[i] += cpuHist[i * 256 + k] ** 2;
+  let maxAbsoluteError = 0;
+  for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) {
+    let expected = 0;
+    if (j >= i && norms[i] && norms[j]) {
+      let dot = 0;
+      for (let k = 0; k < 256; k++) dot += cpuHist[i * 256 + k] * cpuHist[j * 256 + k];
+      expected = dot / Math.sqrt(norms[i]) / Math.sqrt(norms[j]);
+    }
+    const actual = gpu.sim[i * n + j], error = Math.abs(actual - expected);
+    if (!Number.isFinite(actual) || error > tolerance) throw Error(`Similarity differs from CPU at (${i}, ${j}): ${actual} versus ${expected}`);
+    maxAbsoluteError = Math.max(maxAbsoluteError, error);
+  }
+  return {histogramMatchesCpu: true, similarityMatchesCpu: true, comparedHistogramBins: cpuHist.length,
+    comparedSimilarityEntries: n * n, similarityAbsoluteTolerance: tolerance, maxAbsoluteError};
+}
+let verification;
+try { verification = verifyReadback(); }
+catch (error) {
+  const rejected = {status: 'rejected', measuredAt: new Date().toISOString(), provenance,
+    adapter: gpu.adapter, verification: {accepted: false, error: error.message}};
+  if (OUT) { mkdirSync(OUT, {recursive: true}); writeFileSync(path.join(OUT, 'corpus-gpu-analysis.json'), JSON.stringify(rejected, null, 2)); }
+  console.error('GPU RESULT REJECTED: ' + error.message);
+  process.exit(1);
+}
 
 const N = files.length;
 const MB = total / 1048576;
@@ -280,7 +324,8 @@ console.log(`adapter ${JSON.stringify(gpu.adapter)}`);
 console.log(`upload (once)      ${gpu.uploadMs.toFixed(1)} ms  (${(MB / (gpu.uploadMs / 1000)).toFixed(0)} MB/s)`);
 console.log(`pass 1 histograms  ${gpu.histMs.toFixed(2)} ms  (${(MB / (gpu.histMs / 1000)).toFixed(0)} MB/s over ${N} files)`);
 console.log(`pass 2 similarity  ${gpu.simMs.toFixed(2)} ms  (${gpu.pairs.toLocaleString()} pairs)`);
-console.log(`histogram verification vs CPU: ${histAgrees ? 'MATCHES bin for bin' : '*** DISAGREES ***'}`);
+console.log('histogram verification vs CPU: MATCHES bin for bin');
+console.log(`similarity verification vs CPU: all ${verification.comparedSimilarityEntries} entries within ${verification.similarityAbsoluteTolerance}; maximum error ${verification.maxAbsoluteError}`);
 
 console.log('\n=== EXACT DUPLICATES (host SHA-256, reported separately) ===');
 console.log(`duplicate groups   ${dupGroups.length}`);
@@ -324,12 +369,13 @@ console.log('    defensible redundancy number above is the SHA-256 one.');
 if (OUT) {
   mkdirSync(OUT, { recursive: true });
   const report = {
+    status: 'verified', provenance,
     measuredAt: new Date().toISOString(),
     machine: { cpu: os.cpus()[0].model.trim(), logicalCores: os.cpus().length,
       ramGB: +(os.totalmem() / 1073741824).toFixed(2), gpu: gpu.adapter },
     corpus: { root, files: N, bytes: total },
     gpuTiming: { uploadMs: gpu.uploadMs, histMs: gpu.histMs, simMs: gpu.simMs, pairs: gpu.pairs },
-    verification: { histogramMatchesCpu: histAgrees },
+    verification,
     exactDuplicates: { groups: dupGroups.length, redundantBytes: dupBytes,
       pctOfCorpus: +(dupBytes / total * 100).toFixed(2),
       examples: dupGroups.slice(0, 20).map(g => ({ bytes: sizes[g[0]], files: g.map(i => rel[i]) })) },
