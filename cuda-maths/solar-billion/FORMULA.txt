@@ -1,0 +1,35 @@
+THE DETERMINISTIC FORMULA - fitted by enumerating 1,020,600,000 designs, then proved against
+the brute-force best design in every cell of the design surface.
+
+A cell is (module class x site minimum temperature x hot cell temperature x
+home-run band x site cable size). There are 2520 of them.
+
+R1_cold_voltage:
+   N_max = floor(1500 / (Voc * (1 + beta/100 * (Tdesign - 25))))
+
+R1_readings:
+   {"reading_A_with_+10K_allowance": "Tdesign = Tmin + 10", "reading_B_no_allowance": "Tdesign = Tmin", "binding": "reading B; the clause is DISPUTED so both are computed and printed"}
+
+R2_mppt_floor:
+   N_min = ceil(500 / (Vmp * (1 + gamma/100 * (Thot - 25))))
+
+R3_band:
+   buildable N in [max(20, N_min), min(34, N_max)]; empty band = no design in that cell
+
+R4_parallel:
+   Sp_max = floor(40 / (1.25 * Isc)) strings a tracker; fuses needed when Sp >= 3 or (Sp-1)*1.25*Isc > the declared module fuse rating
+
+R5_volt_drop:
+   volt drop pct = Imp * R / (N * Vmp * (1 + gamma/100 * (Thot - 25))) * 100 <= 1.5; R = r_lead*N*0.63 + r_site*((N-2)p + s + 2L) + (N+1)*Rc; monotone in L, so the SHORTEST home run in a band decides whether that band holds a design at all
+
+R6_wiring:
+   conductor metres: sequential = 0.63N + (N-2)p + s + 2L; leapfrog-turned = 2.006N + 2L. Turned costs about 1.09 m of lead for every 1 m of site cable it saves, so it NEVER minimises metres; it only wins on resistance when r_lead / r_site < ((N-2)p + s) / (N * (2p - s + 0.2 - 0.63)), which at N=30, p=1.323 is 0.917 - i.e. only when the lead is a size larger than the site cable
+
+tie_break:
+   the pack maximises N, then minimises conductor metres, then takes the largest lead size and the largest strings-in-parallel that still hold (metres do not depend on cable size, so that tie is settled by cross-section)
+
+PROOF: the rules give the same modules-per-string as brute force in 2520 of 2520 cells
+(100.00%), and the same complete winning tuple in 100.00% of cells.
+Exceptions (0 recorded): see FORMULA.json and RESULTS.json.
+
+THE DISPUTED CLAUSE IS NEVER COLLAPSED. Every cold-voltage answer is two numbers.

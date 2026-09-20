@@ -1,0 +1,71 @@
+{
+ "cells": 2520,
+ "cells_with_a_buildable_design": 1360,
+ "cells_N_reproduced": 2520,
+ "share_N": 1.0,
+ "cells_full_tuple_reproduced": 2520,
+ "share_full_tuple": 1.0,
+ "exceptions": [],
+ "rules": {
+  "R1_cold_voltage": "N_max = floor(1500 / (Voc * (1 + beta/100 * (Tdesign - 25))))",
+  "R1_readings": {
+   "reading_A_with_+10K_allowance": "Tdesign = Tmin + 10",
+   "reading_B_no_allowance": "Tdesign = Tmin",
+   "binding": "reading B; the clause is DISPUTED so both are computed and printed"
+  },
+  "R2_mppt_floor": "N_min = ceil(500 / (Vmp * (1 + gamma/100 * (Thot - 25))))",
+  "R3_band": "buildable N in [max(20, N_min), min(34, N_max)]; empty band = no design in that cell",
+  "R4_parallel": "Sp_max = floor(40 / (1.25 * Isc)) strings a tracker; fuses needed when Sp >= 3 or (Sp-1)*1.25*Isc > the declared module fuse rating",
+  "R5_volt_drop": "volt drop pct = Imp * R / (N * Vmp * (1 + gamma/100 * (Thot - 25))) * 100 <= 1.5; R = r_lead*N*0.63 + r_site*((N-2)p + s + 2L) + (N+1)*Rc; monotone in L, so the SHORTEST home run in a band decides whether that band holds a design at all",
+  "R6_wiring": "conductor metres: sequential = 0.63N + (N-2)p + s + 2L; leapfrog-turned = 2.006N + 2L. Turned costs about 1.09 m of lead for every 1 m of site cable it saves, so it NEVER minimises metres; it only wins on resistance when r_lead / r_site < ((N-2)p + s) / (N * (2p - s + 0.2 - 0.63)), which at N=30, p=1.323 is 0.917 - i.e. only when the lead is a size larger than the site cable",
+  "tie_break": "the pack maximises N, then minimises conductor metres, then takes the largest lead size and the largest strings-in-parallel that still hold (metres do not depend on cable size, so that tie is settled by cross-section)"
+ },
+ "coefficients": {
+  "V_system_ceiling_V": 1500.0,
+  "mppt_min_V": 500.0,
+  "allowance_K": 10.0,
+  "connector_A": 30.0,
+  "tracker_A": 40.0,
+  "volt_drop_cap_pct": 1.5,
+  "copper_alpha_per_K": 0.00393,
+  "R20_ohm_per_km": {
+   "4": 5.09,
+   "6": 3.39,
+   "10": 1.95
+  },
+  "classes": {
+   "T660": {
+    "Voc": 45.9,
+    "Vmp": 38.1,
+    "Isc": 18.45,
+    "Imp": 17.35,
+    "beta_pct_per_K": -0.25,
+    "gamma_pct_per_K": -0.34,
+    "module_fuse_A": 35.0,
+    "wp": 660
+   },
+   "W760": {
+    "Voc": 50.59,
+    "Vmp": 42.58,
+    "Isc": 18.62,
+    "Imp": 17.85,
+    "beta_pct_per_K": -0.22,
+    "gamma_pct_per_K": -0.24,
+    "module_fuse_A": 35.0,
+    "wp": 760
+   },
+   "J-650": {
+    "Voc": 53.27,
+    "Vmp": 44.67,
+    "Isc": 15.41,
+    "Imp": 14.55,
+    "beta_pct_per_K": -0.25,
+    "gamma_pct_per_K": -0.29,
+    "module_fuse_A": 30.0,
+    "wp": 650
+   }
+  },
+  "turned_leapfrog_ratio": 0.917
+ },
+ "cases_behind_it": 1000000000
+}

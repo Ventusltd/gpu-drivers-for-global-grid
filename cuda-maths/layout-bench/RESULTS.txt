@@ -1,0 +1,44 @@
+GPU BENCH 2026-09-20 - RTX 5070 Ti 16 GB, SHARED: a local model server held
+14.6 GB and 96% util when this started. Every number below was taken on a busy card.
+STACK  found: numpy 2.4.6 only - no torch, no cupy, no numba. Installed cupy-cuda12x
+  14.2.0 (+[ctk] headers) in cuda-maths/layout-bench/venv; works on sm_120. PyTorch cu128 not
+  attempted: ~3 GB wheel against an 8-minute budget.
+SCORER cuda-maths/layout-bench/gpu_score.py - EVERY term of score_window implemented (snap,
+  ring-search displacement, octilinear, drops, missing, crossings, labels). None omitted.
+CORRECTNESS 2,000 points on the same coprime stride STRIDE=1000003:
+  NumPy 2000/2000 integer-equal, 0 differ.   CuPy 2000/2000 integer-equal, 0 differ.
+  cmd: N_VERIFY=2000 GPU_BENCH_BACKEND={numpy|cupy} venv/Scripts/python.exe bench.py
+
+THROUGHPUT - layout evaluations per second (1 parameter point = 40 evaluations)
+  CPU 8 workers, existing search, 30 s .......     630,553  (today, contended)
+    cmd: TUBE_SEARCH_SECONDS=30 python (the layout search, held privately)/layout_search.py
+  NumPy ONE core, same scorer, 20 s ..........      51,932
+  CuPy GPU batch 4096   , 22 s ...........      68,219
+  CuPy GPU batch 16384  , 21 s ...........     278,748
+  CuPy GPU batch 65536  , 22 s ...........   1,093,221
+  CuPy GPU batch 262144 , 22 s ...........   3,343,329
+    cmd: BENCH_SECONDS=20 BATCHES=4096,16384,65536,262144 GPU_BENCH_BACKEND=cupy bench.py
+POWER  GPU during the big-batch run: 122 W mean, 132 W peak, 46% util, 11,453 MiB card use.
+  GPU: 27,494 evals per watt-second. CPU: 68.5% whole-machine CPU -> 9,205 evals/s per % CPU.
+  CPU WATTS WERE NOT MEASURED - no wall meter, no RAPL read. Stated plainly.
+SPEED-UP GPU over 8-core CPU: 5.30x   [VERIFIED EXACT, 2000/2000]
+'TENS OF MILLIONS A SECOND': NOT REACHED. Best 3,343,329/s at batch 262,144 - 3.0x short of 10M/s.
+  WRONG as framed ('rewritten with CuPy or PyTorch'). But the rate was still climbing:
+  68k / 279k / 1.09M / 3.34M at batch 4k / 16k / 64k / 256k - a 49x gain from batch size
+  alone, the signature of kernel-launch overhead, not of arithmetic. Ceiling not found.
+WHAT LIMITED IT  Not host-device transfer (8 bytes in, 8 bytes out per point). VRAM did
+  bind at the top: batch 262,144 took card use to 11.4 GB, the largest that fitted beside
+  the other servers, so the curve was cut off, not flattened. The real limit is that the
+  scorer is SEQUENTIAL where it counts - node placement and label placement each read an
+  occupancy set the previous node just wrote, so they stay a per-node loop: 120 window x
+  hop groups x ~17 nodes x up to 28 probes = tens of thousands of tiny kernel launches per
+  batch. Windows hold only 5-17 nodes and 4-18 links: almost no width to feed 8,960 cores.
+  The crossing term - the one piece that vectorises cleanly, <=153 fixed pairs per window -
+  is NOT the bottleneck. A PROPER PORT: one hand-written CUDA kernel, one thread per
+  (point, window), occupancy as a small open-addressed table in shared memory, all 40
+  windows inside the kernel, int32 throughout. Tens of millions is plausible that way;
+  array-at-a-time CuPy - what was actually claimed - got a third of the way.
+LOCAL-MODEL BENCH  REMOVED. The local model lab it measured was deleted on
+  2026-09-20: 15 proposals, 0 accepted, ~168 W average - zero work per watt-second.
+  Its only lasting effect on these numbers is the shared-card condition noted above.
+

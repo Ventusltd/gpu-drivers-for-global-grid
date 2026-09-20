@@ -1,0 +1,52 @@
+GPU SENSE CHECKS on SOLAR-BILLION   2026-09-20   RTX 5070 Ti (shared card)
+Free VRAM at start 15,035 MiB of 16,303. Batch 2,097,152 cases (sized to free VRAM).
+Same arithmetic as (local path removed) - solar_core.py and cpu_vec.kernel reused
+unchanged; float32 obtained by a proxy that only swaps the table dtype.
+
+1 PRECISION  float32 against float64, THE WHOLE SURFACE
+  examined 1,020,600,000 cases.  VERDICTS CHANGED: 0 (0.000000%).
+  CPU cross-check 100,000 cases: CPU fp64 = GPU fp64 exactly; CPU fp32 changed 0.
+  5.14 GPU s, 164.7 W mean.
+  MEANS  no design in the space sits close enough to a limit for single precision to
+  move it. The verdict is not an artefact of arithmetic width.
+
+2 TOLERANCE STACK  16 enumerated corners (Voc +/-1%, beta +/-10%, Tmin -3/-0 K, Isc +3%)
+  examined 1,360 best designs x 16 corners = 21,760 corner evaluations.
+  reading A (+10 K allowance):   130 of 1,360 stop being buildable = 9.6%
+  reading B (no allowance):      974 of 1,360 stop being buildable = 71.6%
+  Modules per string to give up to be robust: A 0.10 mean, 1 max; B 0.72 mean, 1 max.
+  0.04 GPU s, 202.6 W mean.
+  MEANS  under the allowance reading the sizing is nearly tolerance-proof; WITHOUT the
+  allowance nearly three in four "best" strings need ONE module removed. Never quote a
+  modules-per-string number to a customer without the cold reading and a -1 margin.
+
+3 MONOTONICITY  8,388,608 neighbour pairs per property, 41,943,040 pairs in all
+  colder never lowers Voc                 0 violations
+  more modules never lowers Voc           0
+  a larger cable never raises volt drop   0
+  a longer home run never lowers it       0
+  more strings never lowers tracker I     0
+  0.34 GPU s, 118.3 W mean.  No counterexample to report.
+  MEANS  the closed forms behave the way the physics is supposed to; no sign error or
+  table inversion is hiding in the ranking.
+
+4 THE FORMULA UNDER ATTACK  grid shifted half a step on L, Tcond, Tmin, Thot, bifacial
+  and contact resistance - values the formula was never fitted on
+  examined 1,020,600,000 shifted cases -> 1,282 cells with a buildable best.
+  Rule 1 (N = min(34, N_max)) reproduces the brute-force best modules-per-string in
+  1,282 of 1,282 cells = 100.00%, ZERO exceptions, when N_max is taken on the reading
+  that actually binds a BUILDABLE-BOTH-READINGS design: B, no +10 K allowance.
+  Scored against reading A it reproduces only 38.5% - but the same 38.5% appears on the
+  ORIGINAL grid (control, 1,360 cells), so that is the wrong comparator, not a failure.
+  Rule 5's screening set holds the winning wiring in 100% of cells.
+  3.33 GPU s + 8.0 s of control runs, 167.6 W mean.
+  MEANS  "five rules, zero exceptions" survives values it never saw. State WHICH cold
+  reading the rule is quoted on - on the other one it is wrong two times in three.
+
+5 AGGREGATE EQUALITY  100,000,000 cases, GPU against CPU NumPy x12 below normal
+  all seven verdict counts IDENTICAL (2,764,951 / 40,118,552 / 257,337 / 0 / 0 /
+  45,788,343 / 11,070,817).  GPU 0.32 s at 148.4 W; CPU 8.8 s.
+  MEANS  the number a customer is shown does not depend on which machine produced it.
+
+TOTAL 17.2 GPU seconds, 160.3 W mean over the bursts. 5 checks reached, 0 failed,
+0 counterexamples. GPU left idle, CuPy memory pool freed.

@@ -1,0 +1,264 @@
+{
+ "space": 1020600000,
+ "known_answers": [
+  {
+   "check": "cold Voc with +10 K allowance = 1463.06 V",
+   "got": 1463.0625,
+   "want": 1463.0625,
+   "ok": true
+  },
+  {
+   "check": "cold Voc without the allowance = 1497.4 V",
+   "got": 1497.4875,
+   "want": 1497.4,
+   "ok": true
+  },
+  {
+   "check": "block DC = 356.07 kW (24 x 30 x 495 W)",
+   "got": 356.4,
+   "want": 356.4,
+   "ok": true
+  },
+  {
+   "check": "sequential lead 0.63 m a module",
+   "got": 0.63,
+   "want": 0.63,
+   "ok": true
+  },
+  {
+   "check": "turned-leapfrog lead 2.006 m a module",
+   "got": 2.0060000000000002,
+   "want": 2.006,
+   "ok": true
+  },
+  {
+   "check": "two-lead leapfrog 2.846 m a module",
+   "got": 2.846,
+   "want": 2.846,
+   "ok": true
+  },
+  {
+   "check": "site cable saved a string 37.884 m",
+   "got": 37.884,
+   "want": 37.884,
+   "ok": true
+  }
+ ],
+ "verify": {
+  "cases": 100000,
+  "stride": 1000003,
+  "verdict_ref_vs_cpu_mismatch": 0,
+  "verdict_ref_vs_gpu_mismatch": 0,
+  "packed_cpu_vs_gpu_mismatch": 0,
+  "cell_cpu_vs_gpu_mismatch": 0,
+  "max_rel_cpu_vs_ref": 0.0,
+  "max_rel_gpu_vs_ref": 0.0,
+  "tolerance": 1e-09,
+  "all_equal": true
+ },
+ "measure": {
+  "reference": {
+   "cases_per_s": 419526.4715619877,
+   "cases": 100000,
+   "seconds": 0.23836398124694824,
+   "seconds_to_a_billion": 2383.6398124694824,
+   "ran_the_billion": false
+  },
+  "cpu_vectorised": {
+   "cases_per_s": 12767552.86643065,
+   "cases": 360166938,
+   "seconds": 28.209551334381104,
+   "workers": 12,
+   "priority": "below normal",
+   "whole_machine_cpu_pct": 27.0,
+   "seconds_to_a_billion": 78.3235448845699,
+   "ran_the_billion": false
+  },
+  "gpu": {
+   "cases_per_s": 177289777.3137186,
+   "cases": 1000000000,
+   "seconds": 5.640483140945435,
+   "batch": 8388608,
+   "watts_mean": 128.59241379310345,
+   "watts_peak": 147.44,
+   "util_pct_mean": 62.206896551724135,
+   "card_MiB_mean": 13029.0,
+   "cases_per_watt_second": 1378695.4617631326,
+   "seconds_to_a_billion": 5.640483140945435,
+   "ran_the_billion": true
+  },
+  "speedup_gpu_over_cpu": 13.885963831006439,
+  "cpu_watts": "NOT MEASURED - no wall meter and no RAPL read on this machine"
+ },
+ "verdict_counts": {
+  "BUILDABLE-BOTH-READINGS": 21181627,
+  "FAIL-COLD-VOLTAGE-BOTH-READINGS": 400160774,
+  "DISPUTED-COLD-VOLTAGE": 1946532,
+  "FAIL-MPPT-MINIMUM": 0,
+  "FAIL-CONNECTOR-CURRENT": 0,
+  "FAIL-TRACKER-CURRENT": 473520966,
+  "FAIL-VOLT-DROP-CAP": 103190101
+ },
+ "verdict_counts_source": "the full billion",
+ "surface_source": "the billion (a stride-1 dense pass over the space)",
+ "formula": {
+  "cells": 2520,
+  "cells_with_a_buildable_design": 1360,
+  "cells_N_reproduced": 2520,
+  "share_N": 1.0,
+  "cells_full_tuple_reproduced": 2520,
+  "share_full_tuple": 1.0,
+  "exceptions": [],
+  "rules": {
+   "R1_cold_voltage": "N_max = floor(1500 / (Voc * (1 + beta/100 * (Tdesign - 25))))",
+   "R1_readings": {
+    "reading_A_with_+10K_allowance": "Tdesign = Tmin + 10",
+    "reading_B_no_allowance": "Tdesign = Tmin",
+    "binding": "reading B; the clause is DISPUTED so both are computed and printed"
+   },
+   "R2_mppt_floor": "N_min = ceil(500 / (Vmp * (1 + gamma/100 * (Thot - 25))))",
+   "R3_band": "buildable N in [max(20, N_min), min(34, N_max)]; empty band = no design in that cell",
+   "R4_parallel": "Sp_max = floor(40 / (1.25 * Isc)) strings a tracker; fuses needed when Sp >= 3 or (Sp-1)*1.25*Isc > the declared module fuse rating",
+   "R5_volt_drop": "volt drop pct = Imp * R / (N * Vmp * (1 + gamma/100 * (Thot - 25))) * 100 <= 1.5; R = r_lead*N*0.63 + r_site*((N-2)p + s + 2L) + (N+1)*Rc; monotone in L, so the SHORTEST home run in a band decides whether that band holds a design at all",
+   "R6_wiring": "conductor metres: sequential = 0.63N + (N-2)p + s + 2L; leapfrog-turned = 2.006N + 2L. Turned costs about 1.09 m of lead for every 1 m of site cable it saves, so it NEVER minimises metres; it only wins on resistance when r_lead / r_site < ((N-2)p + s) / (N * (2p - s + 0.2 - 0.63)), which at N=30, p=1.323 is 0.917 - i.e. only when the lead is a size larger than the site cable",
+   "tie_break": "the pack maximises N, then minimises conductor metres, then takes the largest lead size and the largest strings-in-parallel that still hold (metres do not depend on cable size, so that tie is settled by cross-section)"
+  },
+  "coefficients": {
+   "V_system_ceiling_V": 1500.0,
+   "mppt_min_V": 500.0,
+   "allowance_K": 10.0,
+   "connector_A": 30.0,
+   "tracker_A": 40.0,
+   "volt_drop_cap_pct": 1.5,
+   "copper_alpha_per_K": 0.00393,
+   "R20_ohm_per_km": {
+    "4": 5.09,
+    "6": 3.39,
+    "10": 1.95
+   },
+   "classes": {
+    "T660": {
+     "Voc": 45.9,
+     "Vmp": 38.1,
+     "Isc": 18.45,
+     "Imp": 17.35,
+     "beta_pct_per_K": -0.25,
+     "gamma_pct_per_K": -0.34,
+     "module_fuse_A": 35.0,
+     "wp": 660
+    },
+    "W760": {
+     "Voc": 50.59,
+     "Vmp": 42.58,
+     "Isc": 18.62,
+     "Imp": 17.85,
+     "beta_pct_per_K": -0.22,
+     "gamma_pct_per_K": -0.24,
+     "module_fuse_A": 35.0,
+     "wp": 760
+    },
+    "J-650": {
+     "Voc": 53.27,
+     "Vmp": 44.67,
+     "Isc": 15.41,
+     "Imp": 14.55,
+     "beta_pct_per_K": -0.25,
+     "gamma_pct_per_K": -0.29,
+     "module_fuse_A": 30.0,
+     "wp": 650
+    }
+   },
+   "turned_leapfrog_ratio": 0.917
+  },
+  "cases_behind_it": 1000000000
+ },
+ "farm_500k": {
+  "modules": 500000,
+  "site": {
+   "Tmin": -10.0,
+   "Thot": 65.0
+  },
+  "seconds": 0.0,
+  "table": [
+   {
+    "cls": "T660",
+    "buildable": true,
+    "modules_per_string": 30,
+    "strings": 16667,
+    "strings_per_inverter": 24,
+    "inverter_blocks": 695,
+    "site_cable_mm2": 4.0,
+    "lead_mm2": 10.0,
+    "wiring": "sequential",
+    "strings_in_parallel_per_tracker": 1,
+    "fuses_needed": false,
+    "lead_km": 315.0,
+    "site_cable_km": 631.4,
+    "home_run_km": 1500.0,
+    "total_conductor_km": 2446.4,
+    "connector_pairs": 516677,
+    "dc_MW": 330.0,
+    "volt_drop_pct_at_mean_home_run": 1.473,
+    "VocA_V": 1463.1,
+    "VocB_V": 1497.5,
+    "VmpHot_V": 987.6
+   },
+   {
+    "cls": "W760",
+    "buildable": true,
+    "modules_per_string": 27,
+    "strings": 18519,
+    "strings_per_inverter": 24,
+    "inverter_blocks": 772,
+    "site_cable_mm2": 4.0,
+    "lead_mm2": 10.0,
+    "wiring": "sequential",
+    "strings_in_parallel_per_tracker": 1,
+    "fuses_needed": false,
+    "lead_km": 315.0,
+    "site_cable_km": 628.1,
+    "home_run_km": 1666.7,
+    "total_conductor_km": 2609.8,
+    "connector_pairs": 518532,
+    "dc_MW": 380.0,
+    "volt_drop_pct_at_mean_home_run": 1.388,
+    "VocA_V": 1441.1,
+    "VocB_V": 1471.1,
+    "VmpHot_V": 1039.3
+   },
+   {
+    "cls": "J-650",
+    "buildable": true,
+    "modules_per_string": 25,
+    "strings": 20000,
+    "strings_per_inverter": 24,
+    "inverter_blocks": 834,
+    "site_cable_mm2": 4.0,
+    "lead_mm2": 10.0,
+    "wiring": "leapfrog-turned",
+    "strings_in_parallel_per_tracker": 2,
+    "fuses_needed": false,
+    "lead_km": 315.0,
+    "site_cable_km": 547.6,
+    "home_run_km": 1800.0,
+    "total_conductor_km": 2662.6,
+    "connector_pairs": 520000,
+    "dc_MW": 325.0,
+    "volt_drop_pct_at_mean_home_run": 1.127,
+    "VocA_V": 1415.0,
+    "VocB_V": 1448.3,
+    "VmpHot_V": 987.2
+   }
+  ]
+ },
+ "limits": [
+  "The cold-voltage clause is DISPUTED. BOTH readings are computed everywhere: reading A adds a +10 K allowance to the site minimum, reading B does not. A design that holds on A but not on B is returned as DISPUTED-COLD-VOLTAGE, never as a bare pass.",
+  "Module pitch, junction-box spacing 0.84 m, 0.1 m lead slack, the 0.63 m supplied lead pair and the 45 m mean home run are ASSUMED (from the bench), not measured.",
+  "Vmp temperature coefficient is ASSUMED equal to the published Pmax coefficient; no class publishes a Vmp coefficient.",
+  "Ampacity is NOT checked here: the volt-drop cap of 1.5 % binds before the current-carrying table on every conductor in this space.",
+  "The inverter backfeed contribution to a string fault is not published, so the fuse answer is the parallel-string term only.",
+  "No rating is claimed beyond the declared tables. No maker, model or price appears anywhere.",
+  "bifacial factor 1.0..1.2 is applied to Isc for the design current and to Imp for the loss terms; it is a declared input, not a measured gain.",
+  "CPU watts were NOT measured - no wall meter and no RAPL read on this machine."
+ ]
+}

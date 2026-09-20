@@ -1,0 +1,138 @@
+{
+ "1_precision": {
+  "examined": 1020600000,
+  "verdicts_changed": 0,
+  "share": 0.0,
+  "gpu_seconds": 5.14,
+  "mean_watts": 164.7,
+  "cpu_crosscheck_cases": 100000,
+  "cpu_gpu_fp64_identical": true,
+  "cpu_fp32_changed": 0
+ },
+ "2_tolerance_stack": {
+  "examined": 21760,
+  "cells": 1360,
+  "corners": 16,
+  "gpu_seconds": 0.04,
+  "mean_watts": 202.6,
+  "by_reading": {
+   "A_with_+10K": {
+    "cells_with_best": 1360,
+    "cells_not_robust": 130,
+    "share_not_robust": 0.09558823529411764,
+    "mean_modules_given_up": 0.09558823529411764,
+    "max_modules_given_up": 1
+   },
+   "B_no_allowance": {
+    "cells_with_best": 1360,
+    "cells_not_robust": 974,
+    "share_not_robust": 0.7161764705882353,
+    "mean_modules_given_up": 0.7161764705882353,
+    "max_modules_given_up": 1
+   }
+  }
+ },
+ "3_monotonicity": {
+  "examined": 41943040,
+  "properties": {
+   "colder_never_lowers_Voc": {
+    "pairs": 8388608,
+    "violations": 0
+   },
+   "more_modules_never_lowers_Voc": {
+    "pairs": 8388608,
+    "violations": 0
+   },
+   "larger_cable_never_raises_vdrop": {
+    "pairs": 8388608,
+    "violations": 0
+   },
+   "longer_home_run_never_lowers_vdrop": {
+    "pairs": 8388608,
+    "violations": 0
+   },
+   "more_strings_never_lowers_tracker_I": {
+    "pairs": 8388608,
+    "violations": 0
+   }
+  },
+  "counterexamples": {},
+  "gpu_seconds": 0.34,
+  "mean_watts": 118.3
+ },
+ "4_shifted_grid": {
+  "examined": 1020600000,
+  "cells_with_best": 1282,
+  "rule_N_reproduced": 494,
+  "share_N": 1.0,
+  "wiring_in_screen_share": 1.0,
+  "exceptions": [],
+  "n_exceptions": 0,
+  "gpu_seconds": 3.33,
+  "mean_watts": 167.6,
+  "comparator_note": "brute-force best = BUILDABLE-BOTH-READINGS, so the binding cold reading is B (no +10 K allowance). Scored under A first, which was the wrong comparator.",
+  "rule_N_reproduced_readingB": 1282,
+  "share_N_readingB": 1.0,
+  "exceptions_readingB": [],
+  "n_exceptions_readingB": 0,
+  "share_N_readingA_wrong_comparator": 0.38533541341653665,
+  "control_base_grid_readingB": {
+   "cells": 1360,
+   "share": 1.0
+  },
+  "control_base_grid_readingA": {
+   "cells": 1360,
+   "share": 0.3860294117647059
+  },
+  "control_gpu_seconds": 8.0
+ },
+ "5_aggregate_equality": {
+  "examined": 100000000,
+  "identical": true,
+  "gpu_counts": [
+   2764951,
+   40118552,
+   257337,
+   0,
+   0,
+   45788343,
+   11070817
+  ],
+  "cpu_counts": [
+   2764951,
+   40118552,
+   257337,
+   0,
+   0,
+   45788343,
+   11070817
+  ],
+  "gpu_seconds": 0.32,
+  "mean_watts": 148.4,
+  "cpu_seconds": 8.8
+ },
+ "_totals": {
+  "gpu_seconds": 17.2,
+  "mean_watts": 160.3,
+  "free_vram_mib_at_start": 15035,
+  "batch": 2097152,
+  "note": "two control re-runs (8.0 s GPU) settled check 4's comparator"
+ },
+ "_verdict_counts_full_space": {
+  "BUILDABLE-BOTH-READINGS": 21502233,
+  "FAIL-COLD-VOLTAGE-BOTH-READINGS": 408240000,
+  "DISPUTED-COLD-VOLTAGE": 1976076,
+  "FAIL-MPPT-MINIMUM": 0,
+  "FAIL-CONNECTOR-CURRENT": 0,
+  "FAIL-TRACKER-CURRENT": 483537600,
+  "FAIL-VOLT-DROP-CAP": 105344091
+ },
+ "_summary": {
+  "check": "gpu-sense",
+  "cases": 2283164800,
+  "passed": 5,
+  "failed": 0,
+  "counterexamples": 0,
+  "seconds": 17.2
+ }
+}

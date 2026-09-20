@@ -1,0 +1,57 @@
+SOLAR-BILLION  2026-09-20  RTX 5070 Ti (shared card) + 12 CPU workers below normal.
+SPACE 1,020,600,000 complete string-and-block designs, mixed radix over 12 axes.
+KNOWN ANSWERS  7/7 of the library's published answers reproduced by the scalar
+  reference: 1463.06 V and 1497.49 V cold (both readings), 0.63 / 2.006 / 2.846 m lead,
+  37.884 m of site cable saved a string, 356.4 kW block.
+VERIFY  100,000 cases on coprime stride 1000003:
+  verdict codes  reference vs NumPy 0 differ, reference vs GPU 0 differ.
+  packed best-design words NumPy vs GPU 0 differ.
+  worst relative difference on 10 numeric outputs: CPU 0.00e+00, GPU 0.00e+00 (tolerance 1e-9).
+  ALL THREE EQUAL: YES
+RATES (only verified arithmetic is reported)
+  scalar reference .......         419,526 cases/s   billion in 0.0 days
+  CPU NumPy x 12 workers .      12,767,553 cases/s   billion in 78.3 s
+  GPU CuPy batch 8388608 .     177,289,777 cases/s   billion in 5.6 s
+  THE BILLION WAS RUN FOR REAL on the GPU (1,000,000,000 cases in 5.6 s).
+  GPU over CPU: 13.89x.  GPU 129 W mean, 147 W peak, 62% util, 13029 MiB card.
+  GPU 1,378,695 cases a watt-second.  Whole-machine CPU during the CPU run: 27.0%.
+  CPU WATTS NOT MEASURED - no wall meter, no RAPL. Stated plainly.
+VERDICTS over the full billion
+  BUILDABLE-BOTH-READINGS               21,181,627
+  FAIL-COLD-VOLTAGE-BOTH-READINGS      400,160,774
+  DISPUTED-COLD-VOLTAGE                  1,946,532
+  FAIL-MPPT-MINIMUM                              0
+  FAIL-CONNECTOR-CURRENT                         0
+  FAIL-TRACKER-CURRENT                 473,520,966
+  FAIL-VOLT-DROP-CAP                   103,190,101
+THE DETERMINISTIC FORMULA  (full text in FORMULA.txt, coefficients in FORMULA.json)
+  1  N_max = floor(1500 / (Voc x (1 + beta/100 x (Tdesign - 25))))
+       Tdesign = Tmin + 10 on the allowance reading, Tmin without it. BOTH are printed.
+  2  N_min = ceil(500 / (Vmp x (1 + gamma/100 x (Thot - 25)))).  Build N = min(34, N_max).
+  3  Sp = floor(40 / (1.25 x Isc)) a tracker; fuses when Sp >= 3 or (Sp-1) x 1.25 x Isc > the module fuse rating.
+  4  volt drop = Imp x R / Vmp_hot <= 1.5 %; monotone in home-run length, so the
+       SHORTEST run in a band decides whether that band holds a design at all - no search.
+  5  leapfrog-turned costs 1.09 m of lead for every 1 m of site cable it saves, so it never
+       minimises METRES - but it deletes the site return run, so it wins on VOLT DROP
+       whenever r_lead / r_site < 0.917, i.e. whenever the lead is a size up on the site
+       cable. Screening sequential alone loses 411 of the 2520 cells; screening both loses none.
+  PROOF  the rules reproduce the brute-force best modules-per-string in 2520 of 2520 cells (100.00%),
+         and the whole winning tuple in 100.00%. Exceptions listed in RESULTS.json (0 shown).
+500,000 MODULES, one temperate site (site minimum -10 C, hot cell 65 C), sized in 0.0000 s:
+  class  N   strings  blocks  cable  cond.km  connector pairs  DC MW  VocA/VocB V  vdrop%
+  T660   30   16,667     695   4 mm2   2446.4          516,677  330.0    1463/1498    1.47
+  W760   27   18,519     772   4 mm2   2609.8          518,532  380.0    1441/1471    1.39
+  J-650  25   20,000     834   4 mm2   2662.6          520,000  325.0    1415/1448    1.13
+WHAT THE KUIPER DRAWS  one block in full (24 strings, 12 trackers, every home run named);
+  the other blocks instanced on a ground grid at three levels of detail. A typed change
+  - another module class, a colder site - is a table lookup on the formula above, not a
+  recompute: the whole 500k picture re-labels in well under a second.
+LIMITS
+  - The cold-voltage clause is DISPUTED. BOTH readings are computed everywhere: reading A adds a +10 K allowance to the site minimum, reading B does not. A design that holds on A but not on B is returned as DISPUTED-COLD-VOLTAGE, never as a bare pass.
+  - Module pitch, junction-box spacing 0.84 m, 0.1 m lead slack, the 0.63 m supplied lead pair and the 45 m mean home run are ASSUMED (from the bench), not measured.
+  - Vmp temperature coefficient is ASSUMED equal to the published Pmax coefficient; no class publishes a Vmp coefficient.
+  - Ampacity is NOT checked here: the volt-drop cap of 1.5 % binds before the current-carrying table on every conductor in this space.
+  - The inverter backfeed contribution to a string fault is not published, so the fuse answer is the parallel-string term only.
+  - No rating is claimed beyond the declared tables. No maker, model or price appears anywhere.
+  - bifacial factor 1.0..1.2 is applied to Isc for the design current and to Imp for the loss terms; it is a declared input, not a measured gain.
+  - CPU watts were NOT measured - no wall meter and no RAPL read on this machine.
