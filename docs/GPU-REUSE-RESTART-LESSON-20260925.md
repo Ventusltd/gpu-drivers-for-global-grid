@@ -8,7 +8,7 @@ The assistant proposed designing a GPU/CI runner arrangement before inspecting t
 
 ## Required restart sequence
 
-1. Read docs/GPU-TESTING-LESSONS-20260924.md, docs/CIRCUIT-MODELLING-LESSONS-20260924.md and the existing engine/fused.py implementation before proposing a new harness.
+1. Read docs/GPU-TESTING-LESSONS-20260924.md and the existing engine/fused.py implementation before proposing a new harness. Consult additional private circuit-model lessons where available; do not publish them as part of this public note.
 2. Inspect the worlds- source and receipts: src/annihilate.py, night-results/annihilate.json and the corrected aggregate receipt referenced in the testing lessons. Read the full current handoff, including later updates; its opening paragraph can predate appended evidence.
 3. Inspect existing runner registrations, labels, live online/offline status and workflows before claiming runner infrastructure is missing. Existing registrations were found; the twelve domain runners were offline when checked. Offline is not absent. Local GPU execution still worked.
 4. Preserve paused workflows and unfinished work. The existing weekly-card workflow and weekly_card.py in the domain working copy were uncommitted adjacent work when inspected; do not silently publish or replace them.
