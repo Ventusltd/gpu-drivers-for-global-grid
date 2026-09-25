@@ -254,6 +254,21 @@ data already in VRAM.
 
 ## How to run it
 
+The corpus analyser now rejects incorrect or incomplete readbacks with exit code 1.
+It checks every histogram bin and every similarity entry against a separate
+CPU calculation before publishing timings or similarity candidates. Cosine values
+use an absolute tolerance of 0.00002 for the shader's float32 arithmetic; a pair
+within that distance of the 0.99 threshold remains a screening boundary case.
+The report records the actual adapter, harness SHA-256, concatenated input SHA-256
+and every input file's path, length and SHA-256. A rejected run replaces the output
+report with `status: rejected` and no timing or similarity claims.
+
+This acceptance check does not retroactively verify the historical reports above.
+Their saved reports check pass 1 only and do not contain the complete inputs or
+similarity readbacks needed to establish pass 2 correctness independently.
+`node --test claude/corpus-verification.test.mjs` injects explicitly synthetic
+readbacks into the real CLI to check acceptance and rejection. It measures no GPU.
+
 ```sh
 # 0. optional: make a stand-in artefact if you do not have the teleprint
 node claude/make-sample-artefact.mjs sample-artefact.txt 26

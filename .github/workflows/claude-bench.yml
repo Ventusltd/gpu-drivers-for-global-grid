@@ -65,6 +65,9 @@ jobs:
         # The real 26 MB teleprint is evidence, not source, and is not committed.
         run: node claude/make-sample-artefact.mjs sample-artefact.txt "${{ github.event.inputs.sizeMB || '26' }}"
 
+      - name: Check corpus acceptance using synthetic readbacks (no GPU measurement)
+        run: node --test claude/corpus-verification.test.mjs
+
       - name: Run the CPU/RAM ladder
         run: node claude/bench-cpu-ram.mjs sample-artefact.txt --threads "${{ github.event.inputs.threads || '1,2,4' }}"
 
@@ -72,7 +75,7 @@ jobs:
         run: |
           echo "::notice title=GPU work skipped::GitHub-hosted runners have no discrete GPU."
           echo "claude/bench-gpu.mjs was NOT run."
-          echo "claude/analyse-corpus-gpu.mjs was NOT run."
+          echo "The corpus analyser acceptance path was tested with synthetic readbacks; no GPU shader was run."
           echo "This runner has no CUDA device and no WebGPU adapter, so it cannot"
           echo "measure the RTX 5070. Running either here would print 'no GPU' and prove"
           echo "nothing about the hardware under test."
