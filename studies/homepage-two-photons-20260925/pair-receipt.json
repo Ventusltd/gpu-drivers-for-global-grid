@@ -1,0 +1,64 @@
+{
+  "status": "pass_scoped_pair",
+  "synthetic": true,
+  "gpu_states": 1000000000,
+  "database_rows": 1000000,
+  "scope": "ID reconstruction, same-category cursor arithmetic, synthetic release states; indexed local provider and browser separately",
+  "not_tested": [
+    "billion-row storage",
+    "production concurrency",
+    "production deployment",
+    "all category hierarchies",
+    "live event replay"
+  ],
+  "mutations": [
+    {
+      "field": 0,
+      "injected_bit_error_detected": true
+    },
+    {
+      "field": 1,
+      "injected_bit_error_detected": true
+    },
+    {
+      "field": 2,
+      "injected_bit_error_detected": true
+    },
+    {
+      "query_value_corruption_detected": true
+    }
+  ],
+  "source_sha256": {
+    "photon_electron.py": "73a8bceaf8f9630b5da7460283c24a105adc3d7df153f5737cd0494b3855d821",
+    "photon_positron.py": "6a619ae876cf2f8cb74cfe72dd9c06d3cacd8ec154e160e8ea2c2768cb249bf9",
+    "run_pair.py": "a18c790ba0bc0cf48e74d7c4ecda4c1088e7d08dda6da7f1a21a63a3e193f30c"
+  },
+  "gpu": "NVIDIA GeForce RTX 5070 Ti",
+  "gpu_result": {
+    "distinct_states": 1000000000,
+    "field_comparisons": 3000000000,
+    "mismatches": 0,
+    "kernel_seconds": 0.07390140831097962,
+    "reference_seconds": 1.7514213556051248,
+    "comparison_seconds": 0.3281816298067572,
+    "whole_gpu_phase_seconds": 2.505481200001668,
+    "chunk_states": 4194304
+  },
+  "database_build_seconds": 0.7736174000310712,
+  "query_plan": [
+    [
+      5,
+      0,
+      51,
+      "SEARCH items USING INDEX category_cursor (category=? AND id>?)"
+    ]
+  ],
+  "query_result": {
+    "random_queries_passed": 256,
+    "complete_category_walks": 3,
+    "invalid_inputs_rejected": 4,
+    "median_query_ms": 0.34619998768903315,
+    "database_bytes": 31473664
+  },
+  "end_to_end_seconds": 4.3357779999496415
+}

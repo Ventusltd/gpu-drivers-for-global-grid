@@ -1,0 +1,31 @@
+{
+    "mismatches":  0,
+    "evidence":  [
+                     {
+                         "sha256":  "53c11950c391a4bc385051f062ea29e29c6ffd1fdd81b7e7e6a53d34ac831b80",
+                         "path":  "studies/homepage-two-photons-20260925/pair-receipt.json"
+                     },
+                     {
+                         "sha256":  "5b41068a9f42af4e25a7bf19a21cd8e027c5c6b43f1e3aba61a85ea5e7c628ce",
+                         "path":  "studies/homepage-two-photons-20260925/browser-receipt.json"
+                     }
+                 ],
+    "mutations_detected":  true,
+    "not_tested":  [
+                       "billion-row storage",
+                       "production concurrency",
+                       "production deployment",
+                       "all category hierarchies",
+                       "live event replay"
+                   ],
+    "database_rows":  1000000,
+    "scope":  "ID reconstruction, same-category cursor arithmetic, synthetic release states; indexed local provider and browser separately",
+    "distinct_states":  1000000000,
+    "rejection_exit_code":  1,
+    "schema":  "cvaa.cuda-furnace.v1",
+    "status":  "confirmed_scoped",
+    "channels":  [
+                     "fused CUDA",
+                     "independent CuPy array graph"
+                 ]
+}

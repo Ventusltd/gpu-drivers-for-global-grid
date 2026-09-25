@@ -34,3 +34,7 @@ Before proposing a replacement, read the referenced implementation and current
 handoff, identify the precise missing connection, and record reuse, extension
 or inapplicability with a reason. CVAA can check this record exists and is
 consistent; it cannot inspect an agent's attention or certify a performance claim.
+
+## Measured furnace reuse, 25 September 2026
+
+[Scoped homepage prototype receipts](../studies/homepage-two-photons-20260925/README.md): one billion synthetic identifiers compared by CUDA and CuPy; separate million-row database/browser checks. See the scope limits and CVAA evidence gate there.

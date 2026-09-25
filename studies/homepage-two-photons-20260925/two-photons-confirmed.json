@@ -1,0 +1,30 @@
+{
+  "status": "confirmed_scoped",
+  "injected_failure": false,
+  "photons": [
+    "photon_electron.py",
+    "photon_positron.py"
+  ],
+  "scope": "ID reconstruction, same-category cursor arithmetic, synthetic release states; indexed local provider and browser separately",
+  "not_tested": [
+    "billion-row storage",
+    "production concurrency",
+    "production deployment",
+    "all category hierarchies",
+    "live event replay"
+  ],
+  "limits": [
+    "One billion distinct identifiers under one synthetic arithmetic model, not independent catalogue scenarios",
+    "Query parity covers explicitly supplied valid intersection of the two APIs",
+    "Mutation checks demonstrate comparator sensitivity, not comprehensive semantic fault resistance",
+    "Synthetic release states are not production promotion validation; ten existing owner tests passed separately"
+  ],
+  "receipts": {
+    "pair-receipt.json": "53c11950c391a4bc385051f062ea29e29c6ffd1fdd81b7e7e6a53d34ac831b80",
+    "browser-receipt.json": "5b41068a9f42af4e25a7bf19a21cd8e027c5c6b43f1e3aba61a85ea5e7c628ce"
+  },
+  "frontend_hashes": {
+    "prototype.html": "82948645e4c61d8e3b78ac7d0c0631dacfb69d2a0c67fb587aef9144102d84a8",
+    "browser_check.cjs": "d5a4cd7615f62c8e82b61fc5503581bf9fd0b967242bc8d333ea638c9a397aee"
+  }
+}

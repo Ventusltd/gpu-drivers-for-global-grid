@@ -1,0 +1,62 @@
+{
+  "sourceHashes": {
+    "prototype.html": "82948645e4c61d8e3b78ac7d0c0631dacfb69d2a0c67fb587aef9144102d84a8",
+    "browser_check.cjs": "d5a4cd7615f62c8e82b61fc5503581bf9fd0b967242bc8d333ea638c9a397aee"
+  },
+  "synthetic": true,
+  "fixtureRows": 1000000,
+  "billionRowDatabaseTest": false,
+  "base": "http://127.0.0.1:8765",
+  "checks": [
+    {
+      "name": "first_page_exact_ids_and_bounds",
+      "pass": true
+    },
+    {
+      "name": "cursor_next_page_exact_ids_no_overlap",
+      "pass": true
+    },
+    {
+      "name": "last_page_boundary_and_two_page_eviction",
+      "pass": true
+    },
+    {
+      "name": "category_switch_resets_cursor_and_cache",
+      "pass": true
+    },
+    {
+      "name": "zero_results_state",
+      "pass": true
+    },
+    {
+      "name": "reset_and_permanent_id_display",
+      "pass": true
+    },
+    {
+      "name": "mobile_390_no_document_overflow",
+      "pass": true
+    },
+    {
+      "name": "invalid_category_http_400",
+      "pass": true
+    },
+    {
+      "name": "no_browser_errors",
+      "pass": true
+    }
+  ],
+  "startedAt": "2026-09-25T01:18:40.591Z",
+  "status": "pass",
+  "finalBrowserBounds": {
+    "category": 0,
+    "min_value": 0,
+    "next_cursor": 405504,
+    "requestAfter": -1,
+    "loading": false,
+    "generation": 6,
+    "retainedPages": 1,
+    "retainedRecords": 100,
+    "renderedRows": 100
+  },
+  "finishedAt": "2026-09-25T01:18:41.550Z"
+}
